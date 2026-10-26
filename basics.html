@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>0 ปูพื้นฐาน — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css?v=20261027">
+<link rel="stylesheet" href="assets/style.css?v=2026102702">
 </head>
 <body>
 <div class="wrap">
@@ -165,8 +165,8 @@
 <tr><td>Page / Frame</td><td>ชิ้นของ logical memory / ช่องของ physical memory (ขนาดเท่ากัน)</td><td>2</td></tr>
 <tr><td>Page table</td><td>ตารางบอกว่า page ไหนอยู่ frame ไหน</td><td>2</td></tr>
 <tr><td>Offset (d)</td><td>ตำแหน่งภายใน page / frame</td><td>2</td></tr>
-<tr><td>TLB</td><td>cache เล็กๆ ของ page table ช่วยแปลง address เร็วขึ้น</td><td>2</td></tr>
-<tr><td>Segmentation</td><td>แบ่งโปรแกรมเป็นส่วนตามความหมาย (code, stack, …) ขนาดไม่เท่ากัน</td><td>2</td></tr>
+<tr><td>TLB <span class="tag skip">ข้ามได้</span></td><td>cache เล็กๆ ของ page table ช่วยแปลง address เร็วขึ้น</td><td>2</td></tr>
+<tr><td>Segmentation <span class="tag skip">ข้ามได้</span></td><td>แบ่งโปรแกรมเป็นส่วนตามความหมาย (code, stack, …) ขนาดไม่เท่ากัน</td><td>2</td></tr>
 <tr><td>Virtual memory</td><td>ทำให้ดูเหมือนมีหน่วยความจำใหญ่กว่า RAM จริง โดยใช้ดิสก์ช่วย</td><td>3</td></tr>
 <tr><td>Demand paging</td><td>โหลด page เข้า RAM เฉพาะตอนที่ต้องใช้</td><td>3</td></tr>
 <tr><td>Valid–invalid bit</td><td>v = page อยู่ใน RAM, i = ไม่อยู่</td><td>3</td></tr>
@@ -176,12 +176,12 @@
 <tr><td>FIFO / OPT / LRU / LFU / MFU</td><td>เข้าก่อนออกก่อน / ไกลสุดในอนาคต / ไม่ได้ใช้นานสุด / ใช้น้อยครั้งสุด / ใช้มากครั้งสุด</td><td>3</td></tr>
 <tr><td>Page fault rate</td><td>จำนวน fault ÷ จำนวนครั้งที่อ้าง</td><td>3</td></tr>
 <tr><td>Belady's anomaly</td><td>เพิ่ม frame แล้ว fault กลับเพิ่ม (เกิดกับ FIFO)</td><td>3</td></tr>
-<tr><td>Thrashing</td><td>สลับ page เข้าออกจนไม่ได้ทำงานจริง</td><td>3</td></tr>
+<tr><td>Thrashing <span class="tag skip">ข้ามได้</span></td><td>สลับ page เข้าออกจนไม่ได้ทำงานจริง</td><td>3</td></tr>
 <tr><td>Block</td><td>หน่วยพื้นที่บนดิสก์ (ดิสก์แบ่งเป็นบล็อกเท่าๆ กัน)</td><td>4</td></tr>
 <tr><td>Free-space management</td><td>วิธีจำว่าบล็อกไหนว่าง (bit vector, linked list, grouping, counting)</td><td>4</td></tr>
 <tr><td>Allocation method</td><td>วิธีวางบล็อกของไฟล์ (contiguous, linked, indexed)</td><td>4</td></tr>
 <tr><td>FAT</td><td>ตารางเก็บว่าบล็อกถัดไปของแต่ละไฟล์คือบล็อกไหน</td><td>4</td></tr>
-<tr><td>Seek / head movement</td><td>การเลื่อนหัวอ่านไปยัง track ที่ต้องการ</td><td>4</td></tr>
+<tr><td>Seek / head movement <span class="tag skip">ข้ามได้</span></td><td>การเลื่อนหัวอ่านไปยัง track ที่ต้องการ</td><td>4</td></tr>
 <tr><td>File property</td><td>ข้อมูลของไฟล์: ชื่อ, ชนิด, ตำแหน่ง, ขนาด, สิทธิ์, เวลา</td><td>5</td></tr>
 <tr><td>Directory</td><td>สมุดรายชื่อไฟล์ (โฟลเดอร์)</td><td>5</td></tr>
 <tr><td>Absolute / relative path</td><td>เส้นทางเริ่มจาก root / เริ่มจากโฟลเดอร์ปัจจุบัน</td><td>5</td></tr>
@@ -194,8 +194,8 @@
 <div class="nextprev"><a href="index.html">← หน้าแรก</a><a class="r" href="deadlock.html">บทที่ 1 Deadlock →</a></div>
 </main>
 </div>
-<script src="assets/core.js?v=20261027"></script>
-<script src="assets/ui.js?v=20261027"></script>
-<script src="assets/widgets.js?v=20261027"></script>
+<script src="assets/core.js?v=2026102702"></script>
+<script src="assets/ui.js?v=2026102702"></script>
+<script src="assets/widgets.js?v=2026102702"></script>
 </body>
 </html>

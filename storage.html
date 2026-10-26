@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>4 Secondary Storage — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css?v=20261027">
+<link rel="stylesheet" href="assets/style.css?v=2026102702">
 </head>
 <body>
 <div class="wrap">
@@ -18,17 +18,18 @@
 
 <h2>4.1 ทำไมต้องมีหน่วยความจำสำรอง</h2>
 <div class="slides">
-  <figure class="slide" data-src="disk" data-page="1" data-img="disk-p01.jpg" data-fig="3.3 + 3.3.1 Disk structure + 3.3.2 free-space" data-t="1406"></figure>
+  <figure class="slide" data-src="disk" data-page="1" data-img="disk-p01.jpg" data-fig="3.3 + 3.3.2 free-space (ส่วน 3.3.1 disk structure ไม่ออก ข้ามได้)" data-t="1406"></figure>
 </div>
 <div class="learn">
 <h4>🤔 Secondary storage คืออะไร</h4>
 <p>= ที่เก็บข้อมูล<b>ถาวร</b> เช่น hard disk, SSD, เทป ใช้เก็บไฟล์และโปรแกรมเมื่อปิดเครื่อง ซึ่ง RAM ทำไม่ได้</p>
 <h4>🤔 Block คืออะไร</h4>
-<p>OS ไม่ได้จัดการดิสก์ทีละ byte แต่แบ่งดิสก์เป็น<b>ช่องขนาดเท่าๆ กันเรียกว่า block</b> แล้วตั้งเลขกำกับ 0, 1, 2, … (คล้ายกับ frame ของ RAM) ไฟล์หนึ่งไฟล์ใช้ 1 block หรือหลาย block ก็ได้ ทั้งบทนี้เป็นเรื่องว่า OS <b>จำว่าบล็อกไหนว่าง</b> (4.2) <b>วางไฟล์ลงบล็อกยังไง</b> (4.3) และ<b>อ่านบล็อกตามลำดับไหนให้เร็ว</b> (4.4)</p>
+<p>OS ไม่ได้จัดการดิสก์ทีละ byte แต่แบ่งดิสก์เป็น<b>ช่องขนาดเท่าๆ กันเรียกว่า block</b> แล้วตั้งเลขกำกับ 0, 1, 2, … (คล้ายกับ frame ของ RAM) ไฟล์หนึ่งไฟล์ใช้ 1 block หรือหลาย block ก็ได้ ที่ต้องอ่านในบทนี้มี 2 เรื่อง คือ OS <b>จำว่าบล็อกไหนว่าง</b> (4.2) และ<b>วางไฟล์ลงบล็อกยังไง</b> (4.3) ส่วน 4.4 disk scheduling พับเก็บไว้ ข้ามได้</p>
 </div>
 <ul>
   <li>หน่วยความจำหลักมีข้อจำกัด 2 ข้อ: <b>(1)</b> พื้นที่น้อย เก็บถาวรไม่ได้ <b>(2)</b> เป็น <b>volatile</b> ไฟดับแล้วข้อมูลหาย</li>
-  <li>หน่วยความจำสำรอง เช่น magnetic tape, disk <span class="tag no">โครงสร้างดิสก์: track, cylinder, sector, head — ไม่ออก</span></li>
+  <li>หน่วยความจำสำรอง เช่น magnetic tape, disk</li>
+  <li><span class="tag no">ไม่ออก</span> หัวข้อ 3.3.1 โครงสร้างดิสก์ (track, cylinder, sector, หัวอ่าน, การหมุน) ในหน้า 95 ของชีท <b>ข้ามได้เลย</b></li>
 </ul>
 
 <div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
@@ -96,7 +97,10 @@
   <div class="q" data-type="mcq" data-answer="1"><div class="qt">วิธีวางไฟล์แบบใดที่กระโดดไปอ่านบล็อกที่ k ของไฟล์ได้ทันทีโดยไม่ต้องไล่จากบล็อกแรก</div><div class="opts"><button class="opt">Linked อย่างเดียว</button><button class="opt">Contiguous และ indexed</button><button class="opt">ไม่มีวิธีไหนทำได้</button></div><div class="fb">contiguous คำนวณได้จาก start + k ส่วน indexed ดูจาก index block ได้เลย แต่ linked ต้องไล่ตามตัวชี้ทีละบล็อก</div></div>
   <div class="q" data-type="text" data-answer="7,3,9|739"><div class="qt">FAT: directory บอก start = 7, FAT[7] = 3, FAT[3] = 9, FAT[9] = end-of-file ไฟล์ใช้บล็อกใดบ้างตามลำดับ (ตอบเช่น 1,2,3)</div><div class="ans"><b>7 → 3 → 9</b></div></div>
 </div></div>
-<h2>4.4 Disk scheduling <span class="tag">ไม่ได้พูดในคลิป</span></h2>
+<h2>4.4 Disk scheduling <span class="tag skip">ข้ามได้</span></h2>
+<p class="muted">อาจารย์บอกว่าเรื่อง hard disk ไม่ออกสอบ และไม่ได้พูดถึง disk scheduling เลย (เป็นเรื่องการเลื่อนหัวอ่านของ hard disk) จึงพับเก็บไว้ อ่านเฉพาะถ้ามีเวลาเหลือ</p>
+<details class="skip"><summary>⏭ ข้ามได้ — เรื่องหัวอ่าน hard disk ที่อาจารย์บอกว่าไม่ออก (กดเพื่อเปิดดู)</summary>
+
 <div class="learn">
 <h4>🤔 คืออะไร</h4>
 <p>hard disk มี<b>หัวอ่าน</b>ที่ต้องเลื่อนไปยัง <b>track</b> (วงบนแผ่นดิสก์ ระบุด้วยเลข 0–199) ที่ต้องการก่อนจึงอ่านได้ การเลื่อนนี้ช้า (เรียกว่า <b>seek time</b>) เมื่อมีหลายคำขอรอในคิว OS จึงต้อง<b>เรียงลำดับว่าจะไปอ่าน track ไหนก่อน</b> ให้หัวอ่านเลื่อนน้อยที่สุด เรียกว่า <b>disk scheduling</b></p>
@@ -135,11 +139,13 @@
 <div class="quiz">
   <div class="q" data-type="num" data-answer="30"><div class="qt">หัวอ่านอยู่ที่ 50 และคิวมี 30, 55 ใช้ SSTF total head movement เท่าไร</div><div class="ans">55 ใกล้กว่า (ห่าง 5) จึงไป 55 ก่อน แล้วไป 30 (ห่าง 25) → 5 + 25 = <b>30</b></div></div>
 </div></div>
+</details>
+
 <div class="nextprev"><a href="vm.html">← บทที่ 3 Virtual Memory</a><a class="r" href="file.html">บทที่ 5 File &amp; Protection →</a></div>
 </main>
 </div>
-<script src="assets/core.js?v=20261027"></script>
-<script src="assets/ui.js?v=20261027"></script>
-<script src="assets/widgets.js?v=20261027"></script>
+<script src="assets/core.js?v=2026102702"></script>
+<script src="assets/ui.js?v=2026102702"></script>
+<script src="assets/widgets.js?v=2026102702"></script>
 </body>
 </html>

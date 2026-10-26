@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ติว OS Final — หน้าแรก</title>
-<link rel="stylesheet" href="assets/style.css?v=20261027">
+<link rel="stylesheet" href="assets/style.css?v=2026102702">
 </head>
 <body>
 <div class="wrap single">
@@ -40,7 +40,7 @@
       <div class="progress" data-progress="vm"><i></i></div><span class="w ptxt"></span></span>
     <span class="stars">★★★★★</span></a>
   <a class="step" href="storage.html"><span class="n">4</span>
-    <span><b>Secondary Storage</b> (ชีท 3.3)<br><span class="w">free-space (bit vector) · allocation methods · disk scheduling (ไม่ได้พูดในคลิป) · โครงสร้างดิสก์ไม่ออก</span>
+    <span><b>Secondary Storage</b> (ชีท 3.3)<br><span class="w">free-space (bit vector) · allocation methods · (โครงสร้างดิสก์กับ disk scheduling พับไว้ ข้ามได้)</span>
       <div class="progress" data-progress="storage"><i></i></div><span class="w ptxt"></span></span>
     <span class="stars">★★☆☆☆</span></a>
   <a class="step" href="file.html"><span class="n">5</span>
@@ -67,8 +67,14 @@
   <tr><td>File property + สิทธิ์</td><td>"minimum ต้องรู้" ชื่อ, ตำแหน่ง, ขนาด, สิทธิ์ r/w/x × owner/group/บุคคลทั่วไป ตั้งด้วย 3 bit</td><td><button class="ts" data-ts="1434"></button></td></tr>
   <tr><td>ระบบ secure</td><td>"นิยามของระบบที่ secure คือ transition ของ state ไม่ไปยัง non-secure"</td><td><button class="ts" data-ts="1511"></button></td></tr>
   <tr><td><span class="tag no">ไม่ออก</span> Hard disk</td><td>"เรื่อง hard disk เรื่องการหมุนแม่เหล็ก <b>จะไม่ออกสอบ</b>"</td><td><button class="ts" data-ts="1392"></button></td></tr>
+  <tr><td><span class="tag">ไม่เน้น</span> Address binding</td><td>ตอนเปิดหน้า address binding อาจารย์บอกว่า "อันนี้จะไม่เน้น"</td><td><button class="ts" data-ts="350"></button></td></tr>
 </table>
 </div>
+<div class="box trap"><span class="t">⏭ สิ่งที่พับเก็บไว้ในเว็บ (ข้ามได้ ไม่ต้องอ่าน)</span>
+• <b>4.4 Disk scheduling</b> และโครงสร้างดิสก์ (track/cylinder/sector) เพราะอาจารย์บอกว่าเรื่อง hard disk ไม่ออก และไม่ได้พูดถึง disk scheduling เลย
+<br>• <b>2.10 TLB / segmentation</b> และ <b>3.10 EAT / thrashing / working set</b> เพราะมาจากสไลด์อังกฤษ ไม่อยู่ในชีทอาจารย์ และอาจารย์ไม่ได้พูดถึง
+<br>• เนื้อหาก่อนมิดเทอม (intro, process, ch2, ch3) ไม่ได้ใส่ในเว็บ
+<br>ส่วนที่พับไว้ยังเปิดดูได้ ถ้ามีเวลาเหลือ (แถบสีเทา "⏭ ข้ามได้")</div>
 
 <h2>ใช้เว็บนี้ยังไง</h2>
 <div class="grid2">
@@ -109,8 +115,8 @@
 
 </main>
 </div>
-<script src="assets/core.js?v=20261027"></script>
-<script src="assets/ui.js?v=20261027"></script>
-<script src="assets/widgets.js?v=20261027"></script>
+<script src="assets/core.js?v=2026102702"></script>
+<script src="assets/ui.js?v=2026102702"></script>
+<script src="assets/widgets.js?v=2026102702"></script>
 </body>
 </html>

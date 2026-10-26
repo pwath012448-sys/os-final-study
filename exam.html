@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ข้อสอบจำลอง — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css?v=20261027">
+<link rel="stylesheet" href="assets/style.css?v=2026102702">
 </head>
 <body>
 <div class="wrap">
@@ -86,10 +86,12 @@ Available = (0, 0, 0, 3)</pre>
 </div>
 
 <h2>ส่วนที่ 4 · Secondary Storage</h2>
-<p class="muted">ยังงง? กลับไปทวน <a href="storage.html">บทที่ 4</a>: free-space (4.2) · disk scheduling (4.4)</p>
+<p class="muted">ยังงง? กลับไปทวน <a href="storage.html">บทที่ 4</a>: free-space (4.2) · allocation methods (4.3)</p>
 <div class="quiz">
   <div class="q" data-type="text" data-answer="110001010001"><div class="qt"><span class="qn">19.</span>ดิสก์ 12 บล็อก (0–11) บล็อกว่าง 2, 3, 4, 6, 8, 9, 10 จงเขียน bit vector ตามชีท</div><div class="ans"><b class="mono">110001010001</b></div></div>
-  <div class="q" data-type="num" data-answer="236"><div class="qt"><span class="qn">20.</span>head 53, คิว 98, 183, 37, 122, 14, 124, 65, 67 ใช้ SSTF total head movement เท่าไร</div><div class="ans">53→65→67→37→14→98→122→124→183 = 12+2+30+23+84+24+2+59 = <b>236</b></div></div>
+  <details class="skip"><summary>⏭ ข้ามได้ — disk scheduling (เรื่อง hard disk ที่อาจารย์บอกว่าไม่ออก)</summary>
+<div class="q" data-type="num" data-answer="236"><div class="qt"><span class="qn">20.</span>head 53, คิว 98, 183, 37, 122, 14, 124, 65, 67 ใช้ SSTF total head movement เท่าไร</div><div class="ans">53→65→67→37→14→98→122→124→183 = 12+2+30+23+84+24+2+59 = <b>236</b></div></div>
+</details>
 </div>
 
 <h2>ส่วนที่ 5 · File System &amp; Protection</h2>
@@ -113,7 +115,7 @@ Available = (0, 0, 0, 3)</pre>
 <div data-widget="gen" data-kind="pr"></div>
 <div data-widget="gen" data-kind="banker"></div>
 <div data-widget="gen" data-kind="paging"></div>
-<div data-widget="gen" data-kind="disk"></div>
+
 
 <h2>แผนอ่าน</h2>
 <div class="grid2">
@@ -130,8 +132,8 @@ Available = (0, 0, 0, 3)</pre>
 </div>
 </main>
 </div>
-<script src="assets/core.js?v=20261027"></script>
-<script src="assets/ui.js?v=20261027"></script>
-<script src="assets/widgets.js?v=20261027"></script>
+<script src="assets/core.js?v=2026102702"></script>
+<script src="assets/ui.js?v=2026102702"></script>
+<script src="assets/widgets.js?v=2026102702"></script>
 </body>
 </html>

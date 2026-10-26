@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>2 Memory Management — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css?v=20261027">
+<link rel="stylesheet" href="assets/style.css?v=2026102702">
 </head>
 <body>
 <div class="wrap">
@@ -23,7 +23,8 @@
 </ol>
 </div>
 
-<h2>2.1 Address binding (การผูก address)</h2>
+<h2>2.1 Address binding (การผูก address) <span class="tag">ไม่เน้น</span></h2>
+<p class="muted">อาจารย์บอกว่า "อันนี้จะไม่เน้น" ให้อ่านแค่พอเข้าใจ แล้วจำตาราง 3 จังหวะด้านล่างก็พอ เพราะเป็นพื้นฐานของหัวข้อ 2.2</p>
 <div class="learn">
 <h4>🤔 คืออะไร</h4>
 <p>ตอนเราเขียนโปรแกรม เราอ้างข้อมูลด้วย<b>ชื่อ</b> เช่น ตัวแปร <code>x</code> หรือฟังก์ชัน <code>sum()</code> (เรียกว่า <b>symbolic address</b>) แต่ CPU ไม่รู้จักชื่อ CPU รู้จักแค่<b>เลขช่องใน RAM</b> (physical address)
@@ -338,7 +339,9 @@ physical      = 000110 | 0111011110  = 6×1024 + 478 = 6622</pre>
 <p>ฝึกเพิ่มด้วยโจทย์สุ่ม:</p>
 <div data-widget="gen" data-kind="paging"></div>
 
-<h2>2.10 เสริมจากสไลด์อังกฤษ ch8 (อาจารย์ไม่ได้เปิดในคลิป)</h2>
+<h2>2.10 เสริมนอกชีท: TLB, segmentation <span class="tag skip">ข้ามได้</span></h2>
+<details class="skip"><summary>⏭ ข้ามได้ — ไม่อยู่ในชีทอาจารย์ และอาจารย์ไม่ได้พูดถึง (กดเพื่อเปิดดู)</summary>
+
 <p class="muted">อยู่ในแผนการสอนสัปดาห์ที่ 10 (Paging, Segmentation) ให้อ่านหลังจากเข้าใจส่วนบนแล้ว</p>
 <div class="learn">
 <h4>🤔 TLB คืออะไร</h4>
@@ -362,6 +365,8 @@ physical      = 000110 | 0111011110  = 6×1024 + 478 = 6622</pre>
     <div class="ans">0.98 × (20 + 100) + 0.02 × (20 + 200) = 117.6 + 4.4 = <b>122 ns</b></div></div>
 </div>
 
+</details>
+
 <h2>สรุปบทนี้ใน 1 นาที</h2>
 <div class="card"><ul>
   <li>Binding 3 จังหวะ: compile (absolute) / load (relocatable) / execution (ย้ายได้ ใช้ base register)</li>
@@ -377,8 +382,8 @@ physical      = 000110 | 0111011110  = 6×1024 + 478 = 6622</pre>
 <div class="nextprev"><a href="deadlock.html">← บทที่ 1 Deadlock</a><a class="r" href="vm.html">บทที่ 3 Virtual Memory ★ →</a></div>
 </main>
 </div>
-<script src="assets/core.js?v=20261027"></script>
-<script src="assets/ui.js?v=20261027"></script>
-<script src="assets/widgets.js?v=20261027"></script>
+<script src="assets/core.js?v=2026102702"></script>
+<script src="assets/ui.js?v=2026102702"></script>
+<script src="assets/widgets.js?v=2026102702"></script>
 </body>
 </html>

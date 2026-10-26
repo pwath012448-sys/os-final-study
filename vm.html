@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>3 Virtual Memory ★ — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css?v=20261027">
+<link rel="stylesheet" href="assets/style.css?v=2026102702">
 </head>
 <body>
 <div class="wrap">
@@ -302,7 +302,9 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
 <h3>🎲 ฝึกไม่จำกัด</h3>
 <div data-widget="gen" data-kind="pr"></div>
 
-<h2>3.10 เสริมจากสไลด์อังกฤษ ch9 (อาจารย์ไม่ได้เปิดในคลิป)</h2>
+<h2>3.10 เสริมนอกชีท: EAT, thrashing, working set <span class="tag skip">ข้ามได้</span></h2>
+<details class="skip"><summary>⏭ ข้ามได้ — ไม่อยู่ในชีทอาจารย์ และอาจารย์ไม่ได้พูดถึง (กดเพื่อเปิดดู)</summary>
+
 <div class="slides">
   <figure class="slide" data-src="ch9" data-page="12" data-img="ch9-p12.jpg" data-fig="Page Fault (6 ขั้นแบบตำรา)"></figure>
   <figure class="slide" data-src="ch9" data-page="16" data-img="ch9-p16.jpg" data-fig="Demand Paging Example (EAT)"></figure>
@@ -315,6 +317,8 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
   <li><b>Working set</b> = ชุดเพจที่ถูกอ้างในหน้าต่าง Δ ล่าสุด ถ้าผลรวม working set ของทุกโปรเซส (D) มากกว่าจำนวนเฟรม (m) → thrashing ต้อง suspend บางโปรเซส</li>
 </ul>
 
+</details>
+
 <h2>สรุปบทนี้ใน 1 นาที</h2>
 <div class="card"><ul>
   <li>Virtual memory = logical ใหญ่กว่า physical โดยใช้ดิสก์ · demand paging · v/i bit</li>
@@ -326,8 +330,8 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
 <div class="nextprev"><a href="memory.html">← บทที่ 2 Memory</a><a class="r" href="storage.html">บทที่ 4 Storage →</a></div>
 </main>
 </div>
-<script src="assets/core.js?v=20261027"></script>
-<script src="assets/ui.js?v=20261027"></script>
-<script src="assets/widgets.js?v=20261027"></script>
+<script src="assets/core.js?v=2026102702"></script>
+<script src="assets/ui.js?v=2026102702"></script>
+<script src="assets/widgets.js?v=2026102702"></script>
 </body>
 </html>
