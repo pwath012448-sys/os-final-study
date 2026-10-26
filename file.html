@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 File System &amp; Protection — ติว OS Final</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+<aside class="toc"></aside>
+<main>
+<h1>บทที่ 5 · File System &amp; Protection <span class="tag hot">ออก</span></h1>
+<p class="lead">ชีท <b>file and protection(4_1)</b> หน้า 106–117 (12 หน้า) — อาจารย์เปิดในคลิปนาที 23:54–28:50 และวาดรูปใน Paint เพิ่ม</p>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>ไปเรื่องสุดท้าย file กับระบบความปลอดภัยนะครับ ก็ให้รู้อย่างน้อย minimum ก็ต้องรู้ว่ามีสิทธิ์ มี file property มีอะไรบ้าง มีชื่อ file, ตำแหน่ง pointer ที่ชี้ไปยังตำแหน่งใน hard disk แล้วก็ขนาด แล้วก็สิทธิ์ในการเข้าถึง มี 3 สิทธิ์ 3 level ก็คือ เขียน อ่าน แล้วก็ execute … 3 user group คือ เจ้าของไฟล์ กลุ่มที่เจ้าของไฟล์ set ไว้ แล้วก็บุคคลทั่วไป คล้ายๆ กับ share file ใน Google Drive</q> <button class="ts" data-ts="1434"></button></div>
+<div class="box goal"><span class="t">🎯 เรียนจบบทนี้ต้องทำได้</span>
+1) บอก <b>file property</b> ได้
+<br>2) อธิบาย<b>สิทธิ์ r/w/x × owner/group/others</b> และแปลงเป็นเลข 3 บิตได้
+<br>3) อธิบาย<b>ระบบ secure ด้วย state transition</b> ได้
+<br>4) รู้โครงสร้าง directory, access method และอ่าน access matrix ได้</div>
+
+<h2>5.1 พื้นฐานของระบบไฟล์</h2>
+<div class="slides">
+  <figure class="slide" data-src="file" data-page="1" data-img="file-p01.jpg" data-fig="รูปที่ 4.1.A field → record → file → database" data-t="1462"></figure>
+  <figure class="slide" data-src="file" data-page="2" data-img="file-p02.jpg" data-fig="รูปที่ 4.1.B layered file system + 4.1.2 file operations" data-t="1496"></figure>
+</div>
+<ul>
+  <li><b>Field</b> = ข้อมูลแต่ละชนิด (รหัส, ชื่อ, เงินเดือน) → <b>Record</b> = กลุ่มฟิลด์ 1 แถว เช่น <code>code001 : Mr. Sombat Tanee : 5000</code> → <b>File</b> = กลุ่มเรคคอร์ดแบบเดียวกัน → <b>Database</b> = กลุ่มไฟล์ที่มีความสัมพันธ์กัน</li>
+</ul>
+<h3>Layered file system (ล่าง → บน)</h3>
+<pre>[5] Application programs      โปรแกรมผู้ใช้
+[4] Logical file system       directory structure, symbolic file name
+[3] File-organization module  รู้จักไฟล์และบล็อก แปลงเป็น address ของบล็อก
+[2] Basic file system         อ่าน/เขียนบล็อกตามตำแหน่งกายภาพ เช่น drive1, cylinder 70, surface 2, sector 5
+[1] I/O control               device driver + interrupt handler
+    Devices</pre>
+<p><b>File operations</b>: create, write, read, delete, reset (ชี้กลับต้นไฟล์) + open, close, seek, attribute, rename, append</p>
+
+<h2>5.2 Access methods</h2>
+<div class="slides">
+  <figure class="slide" data-src="file" data-page="3" data-img="file-p03.jpg" data-fig="รูปที่ 4.1.C sequential, 4.1.D sequential บน direct"></figure>
+  <figure class="slide" data-src="file" data-page="4" data-img="file-p04.jpg" data-fig="รูปที่ 4.1.E ISAM + 4.1.4 directory"></figure>
+</div>
+<ul>
+  <li><b>Sequential access</b> (แบบเทป) อ่าน/เขียนตามลำดับ ใช้ rewind ย้อนกลับ</li>
+  <li><b>Direct access</b> (แบบดิสก์) กระโดดไปบล็อกที่ต้องการได้เลย ทำ sequential บน direct ได้ดังนี้ reset → <code>cp := 0</code>, read next → <code>read cp; cp := cp + 1</code>, write next → <code>write cp; cp := cp + 1</code></li>
+  <li><b>ISAM</b>: master index (binary search) → secondary index (binary search) → actual file block (อ่านแบบ sequential)</li>
+</ul>
+
+<h2>5.3 File property (ข้อมูลใน directory) ★</h2>
+<div class="slides">
+  <figure class="slide" data-src="file" data-page="4" data-img="file-p04.jpg" data-fig="4.1.4 directory structure (file name, type, location, size, …)"></figure>
+  <figure class="slide" data-src="file" data-page="5" data-img="file-p05.jpg" data-fig="protection, time and date, directory operations, single-level"></figure>
+</div>
+<table class="t left">
+  <tr><th>Property</th><th>ความหมาย</th></tr>
+  <tr><td><b>file name</b></td><td>ชื่อไฟล์ + นามสกุล เช่น .exe/.com (รันได้), .txt (ข้อความ), .obj (object file)</td></tr>
+  <tr><td><b>file type</b></td><td>ประเภท เช่น binary, text (สัมพันธ์กับนามสกุล)</td></tr>
+  <tr><td><b>location</b></td><td><b>pointer</b> ไปยังอุปกรณ์และตำแหน่งบนดิสก์ (volume, cylinder, track, block number)</td></tr>
+  <tr><td><b>size</b></td><td>ขนาด (byte, word, block)</td></tr>
+  <tr><td><b>current position</b></td><td>pointer ตำแหน่งที่กำลังอ่าน/เขียน</td></tr>
+  <tr><td><b>protection</b></td><td>สิทธิ์: read only, read and write, execute</td></tr>
+  <tr><td><b>time and date</b></td><td>วันเวลาที่สร้าง/แก้ไขล่าสุด</td></tr>
+</table>
+<p><b>Directory operations</b>: search, create file, delete file, list directory, back up</p>
+
+<h2>5.4 โครงสร้าง directory</h2>
+<div class="slides">
+  <figure class="slide" data-src="file" data-page="6" data-img="file-p06.jpg" data-fig="รูปที่ 4.1.G two-level + tree" data-t="1508"></figure>
+  <figure class="slide" data-src="file" data-page="7" data-img="file-p07.jpg" data-fig="รูปที่ 4.1.H tree-structure" data-t="1516"></figure>
+  <figure class="slide" data-src="file" data-page="8" data-img="file-p08.jpg" data-fig="รูปที่ 4.1.I acyclic graph"></figure>
+  <figure class="slide" data-src="file" data-page="9" data-img="file-p09.jpg" data-fig="รูปที่ 4.1.J general graph"></figure>
+</div>
+<table class="t left">
+  <tr><th>แบบ</th><th>ลักษณะ</th><th>ข้อจำกัด / จุดสำคัญ</th></tr>
+  <tr><td>1. Single-level</td><td>ชั้นเดียว ทุกไฟล์อยู่รวมกัน</td><td>ชื่อไฟล์ห้ามซ้ำทั้งระบบ ซึ่งยากเมื่อมีผู้ใช้หลายคน</td></tr>
+  <tr><td>2. Two-level</td><td><b>MFD</b> (รายชื่อผู้ใช้) → <b>UFD</b> (ไฟล์ของแต่ละคน)</td><td>ถ้ามีไฟล์มากก็ยังต้องระวังชื่อซ้ำใน UFD ตัวเอง</td></tr>
+  <tr><td>3. Tree</td><td>root + subdirectory อ้างไฟล์ด้วย path name</td><td><b>absolute</b> = ไล่จาก root เช่น <code>/root/spell/mail/prt/first</code> ส่วน <b>relative</b> = ไล่จาก working directory เช่น อยู่ <code>/root/spell/mail</code> → <code>prt/first</code></td></tr>
+  <tr><td>4. Acyclic graph</td><td>แชร์ไฟล์/subdirectory ได้ (link, symbolic link)</td><td>ไม่มี cycle</td></tr>
+  <tr><td>5. General graph</td><td>มี cycle ได้</td><td>ท่องแล้วอาจวนไม่จบ (infinite loop) จึงใช้ <b>garbage collection</b> (mark ไฟล์ที่เข้าถึงได้ ส่วนที่เหลือคืนเป็น free space) ซึ่งเสียเวลา</td></tr>
+</table>
+<div class="quiz">
+  <div class="q" data-type="text" data-answer="p11/p11_2"><div class="qt"><span class="qn">Q1</span>รูป 4.1.H ถ้า working directory คือ <code>/program/p1</code> จะเขียน relative path ของไฟล์ p11_2 อย่างไร</div>
+    <div class="ans"><b>p11/p11_2</b> (absolute = /program/p1/p11/p11_2)</div></div>
+</div>
+
+<h2>5.5 สิทธิ์ไฟล์: 3 สิทธิ์ × 3 กลุ่ม (3 bit) ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>สิทธิ์ของ file ไปทบทวนครับ สิทธิ์ของ file 3 level … owner แล้วก็ group แล้วก็ other บุคคลทั่วไปครับ แต่ละ user ก็จะมีสิทธิ์ 3 อย่าง ซึ่งเราสามารถ set ผ่าน bit ได้เป็น 3 bit ไปดูเอาเองนะครับอยู่ในหนังสือ</q> <button class="ts" data-ts="1685"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="file" data-page="10" data-img="file-p10.jpg" data-fig="4.2.1 file protection: access list / access group (owner, group, universe)"></figure>
+</div>
+<ul>
+  <li><b>ชนิดสิทธิ์ (ชีท)</b>: Read, Write (รวม rewrite), Execute, Append, Delete และอื่นๆ เช่น Rename, Copy, Edit</li>
+  <li><b>วิธีควบคุม</b>: Naming, Password, <b>Access list</b> (ระบุรายคน ถ้าจะให้ทุกคนอ่านได้ต้องใส่ชื่อทุกคน ซึ่งยุ่งยาก) และ <b>Access group</b> แก้ปัญหานี้ด้วยการแบ่งกลุ่มเป็น <b>owner / group / universe</b></li>
+</ul>
+<div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: แชร์ไฟล์ใน Google Drive (อาจารย์ยกตัวอย่างนี้เอง)</span>เจ้าของ (owner) ทำได้ทุกอย่าง, คนที่เราแชร์ให้ (group) อาจแก้ได้หรือดูได้อย่างเดียว, คนทั่วไปที่มีลิงก์ (others) อาจดูได้หรือเข้าไม่ได้เลย Unix/Linux ทำแบบเดียวกันด้วย 3 บิตต่อกลุ่ม</div>
+<pre>r = 4 (อ่าน)   w = 2 (เขียน)   x = 1 (execute)
+แต่ละกลุ่มรวมเลขกัน → ได้เลข 3 หลัก: owner | group | others
+
+rwx r-x r--  = (4+2+1)(4+0+1)(4+0+0) = 754
+rw- r-- ---  = 640   (owner อ่าน/เขียน, group อ่าน, others ไม่ได้อะไร)
+chmod 750 file  → rwx r-x ---</pre>
+<div data-widget="perm"></div>
+<div class="quiz">
+  <div class="q" data-type="num" data-answer="754"><div class="qt"><span class="qn">Q2</span><code>rwxr-xr--</code> เขียนเป็นเลขฐาน 8 ได้เท่าไร</div><div class="ans">7 (rwx) 5 (r-x) 4 (r--) = <b>754</b></div></div>
+  <div class="q" data-type="num" data-answer="750"><div class="qt"><span class="qn">Q3</span>ให้เจ้าของอ่าน/เขียน/รันได้, กลุ่มอ่าน/รันได้, คนอื่นทำอะไรไม่ได้ ต้องตั้งเลขอะไร</div><div class="ans">rwx r-x --- = <b>750</b></div></div>
+  <div class="q" data-type="mcq" data-answer="2"><div class="qt"><span class="qn">Q4</span><code>644</code> หมายถึงอะไร</div><div class="opts">
+    <button class="opt">ทุกคนอ่าน/เขียนได้</button><button class="opt">เจ้าของรันได้อย่างเดียว</button><button class="opt">เจ้าของอ่าน/เขียน ส่วน group และ others อ่านได้อย่างเดียว</button><button class="opt">ไม่มีใครเขียนได้</button></div>
+    <div class="fb">6 = rw- (4+2), 4 = r-- ดังนั้น 644 = rw- r-- r--</div></div>
+</div>
+
+<h2>5.6 นิยามของระบบที่ secure (state machine) ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด (วาดใน Paint)</span><q>นิยามของระบบที่ secure คืออะไร ก็คือ transition ของ state มันไม่ไปยัง non-secure … automata … สถานะ S0 S1 S2 เกิดเหตุการณ์ string a b ก็ transition วนอยู่ในนี้ ถ้ามันวนอยู่ใน secure state ก็ถือว่าระบบมันผ่าน cyber security … OS หรือตัวจัดการส่วนอื่นมันผิดพลาด มันก็จะเกิด transition ที่เราไม่พึงประสงค์ เช่นส่งโทรจันมาทำให้เกิดการ backdoor ออกไปยัง non-secure … พอรู้ปุ๊บก็ปิด transition … คือนิยามด้วย finite state machine</q>
+<button class="ts" data-ts="1511"></button> <button class="ts" data-ts="1604"></button></div>
+<div class="slides wide">
+  <figure class="slide" data-src="clip" data-img="fsm-paint-start.jpg" data-fig="อาจารย์เริ่มวาด: state ใน secured set" data-t="1640"></figure>
+  <figure class="slide" data-src="clip" data-img="fsm-paint.jpg" data-fig="ภาพสุดท้าย: transition ที่หลุดไป non-secure (สีแดง)" data-t="1694"></figure>
+</div>
+<div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: ห้องในบ้านที่ปิดประตูหมด</span>
+state = ห้อง, transition = ประตูที่เปิดเมื่อเกิดเหตุการณ์ (input a, b) ระบบจะ <b>secure</b> ก็ต่อเมื่อประตูทุกบานจากห้องที่ปลอดภัยพาไปได้แค่ห้องที่ปลอดภัย
+<br>ถ้ามีประตูลับ (ช่องโหว่ / backdoor / trojan) ที่พาออกไปนอกบ้านได้ ระบบก็ไม่ secure และวิธีแก้คือ<b>ปิดประตูนั้น (patch)</b></div>
+<div data-widget="fsm"></div>
+<div class="box exam"><span class="t">📝 เขียนตอบแบบนี้</span><pre>มองระบบเป็น finite state machine: แบ่ง state เป็น secure set กับ non-secure
+ระบบจะ secure เมื่อทุก transition (ทุก input/เหตุการณ์) ที่ออกจาก secure state
+พาไปได้แค่ secure state เท่านั้น ระบบจึงวนอยู่ใน secure set เสมอ
+ถ้า OS ผิดพลาดหรือมีช่องโหว่ (เช่น trojan ทำ backdoor) จะมี transition ไป non-secure
+ต้องปิด transition หรือเหตุการณ์ที่ trigger นั้น (patch)</pre></div>
+
+<h2>5.7 Domain of protection และ access matrix</h2>
+<div class="slides">
+  <figure class="slide" data-src="file" data-page="11" data-img="file-p11.jpg" data-fig="รูปที่ 4.2.A protection domains"></figure>
+  <figure class="slide" data-src="file" data-page="12" data-img="file-p12.jpg" data-fig="รูปที่ 4.2.B access matrix, 4.2.C dynamic (switch)"></figure>
+</div>
+<ul>
+  <li><b>Object</b>: hardware (CPU, printer, disk, memory segment, tape drive) และ software (file, program, semaphore)</li>
+  <li><b>Domain</b> เขียนเป็นคู่ <b>&lt;object-name, rights-set&gt;</b> เช่น D2 = { &lt;O2, {write}&gt;, &lt;O4, {print}&gt; } (O4 ใช้ร่วมกับ D3)</li>
+  <li><b>Access matrix</b>: แถว = domain, คอลัมน์ = object, ช่อง Access(i, j) = สิทธิ์ที่ D<sub>i</sub> ทำกับ O<sub>j</sub> ได้ และ global table เขียนเป็น <b>&lt;domain, object, rights-set&gt;</b> (ถ้าการกระทำ M ∈ R<sub>k</sub> จึงอนุญาต)</li>
+  <li><b>Static</b> = กำหนดตายตัว ส่วน <b>dynamic</b> = มีคอลัมน์ D1–D4 ที่เขียนว่า "switch" ให้สลับไปโดเมนอื่นได้ แล้วได้สิทธิ์เท่ากับโดเมนนั้น เช่น D2 switch ไป D3 จะได้ read F2, execute F3</li>
+</ul>
+<div class="box trap"><span class="t">⚠️ สังเกต</span>ตารางในรูป 4.2.B กับ 4.2.C ในชีทไม่เหมือนกันทุกช่อง (เช่น ใน 4.2.B D2 อ่าน F3 ได้ แต่ใน 4.2.C ไม่ได้) ตอบตามตารางที่โจทย์ให้มาเสมอ</div>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt"><span class="qn">Q5</span>ตามรูป 4.2.C โปรเซสใน D2 ถ้า switch ไป D3 จะทำอะไรได้เพิ่ม</div><div class="opts">
+    <button class="opt">read, write F1</button><button class="opt">read F2, execute F3</button><button class="opt">print ที่ printer</button><button class="opt">switch ไป D1</button></div>
+    <div class="fb">แถว D3 = F2: read, F3: execute (ชีทยกตัวอย่างข้อนี้เอง)</div></div>
+  <div class="q" data-type="mcq" data-answer="3"><div class="qt"><span class="qn">Q6</span>ตามรูป 4.2.C D1 switch ไปโดเมนใดได้บ้าง</div><div class="opts">
+    <button class="opt">D2 เท่านั้น</button><button class="opt">D3 และ D4</button><button class="opt">D4 เท่านั้น</button><button class="opt">D2 และ D4</button></div>
+    <div class="fb">แถว D1 มี switch ใต้คอลัมน์ D2 และ D4</div></div>
+</div>
+
+<div class="nextprev"><a href="storage.html">← บทที่ 4 Storage</a><a class="r" href="exam.html">ข้อสอบจำลอง →</a></div>
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>

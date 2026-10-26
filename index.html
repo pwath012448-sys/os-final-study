@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ติว OS Final — หน้าแรก</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap single">
+<main>
+
+<div class="hero">
+  <h1>ติว OS Final แบบเข้าใจจริง แล้วทำข้อสอบได้</h1>
+  <p class="lead">เว็บนี้ทำจาก<b>คลิปที่อาจารย์บอกแนวข้อสอบ (16 ต.ค. 2026)</b> และ<b>ชีทของอาจารย์ทั้ง 5 ไฟล์</b> ทุกเรื่องมีภาพสไลด์จริงพร้อมบอกว่าอยู่หน้าไหน มีปุ่มฟังเสียงอาจารย์ตรงช่วงที่พูด มีเครื่องมือให้ลองกดเอง และมีแบบฝึกหัดที่ตรวจคำตอบให้ทันที</p>
+  <div class="grid3">
+    <div class="box exam"><span class="t">📌 รูปแบบสอบ</span><b>Closed book</b> ห้ามนำหนังสือหรือเอกสารเข้าห้องสอบ <button class="ts" data-ts="36"></button></div>
+    <div class="box exam"><span class="t">❓ จำนวนข้อ</span>ยังไม่ประกาศ อาจารย์จะออกข้อสอบใกล้วันสอบเพื่อกันข้อสอบรั่ว <button class="ts" data-ts="1749"></button></div>
+    <div class="box exam"><span class="t">📚 ขอบเขต</span>ชีท 2.4 Deadlock, 3.1 Memory, 3.2 Virtual Memory, 3.3 Storage และ 4.1–4.2 File &amp; Protection</div>
+  </div>
+</div>
+
+<h2>เรียนตามลำดับนี้</h2>
+<p>เรียงตามบทในชีท ดาวคือน้ำหนักที่อาจารย์ย้ำในคลิป ถ้าเวลาน้อย ให้ทำ <b>3 → 1 → 2 → 5 → 4</b></p>
+<div class="roadmap">
+  <a class="step" href="deadlock.html"><span class="n">1</span>
+    <span><b>Deadlock</b> (ชีท 2.4)<br><span class="w">เงื่อนไข 4 ข้อ · resource allocation graph + matrix · prevention · safe/unsafe · Banker's · detection</span>
+      <div class="progress" data-progress="deadlock"><i></i></div><span class="w ptxt"></span></span>
+    <span class="stars">★★★★☆</span></a>
+  <a class="step" href="memory.html"><span class="n">2</span>
+    <span><b>Memory Management</b> (ชีท 3.1)<br><span class="w">logical vs physical · first/best/worst fit · compaction · paging · swapping · low/high memory</span>
+      <div class="progress" data-progress="memory"><i></i></div><span class="w ptxt"></span></span>
+    <span class="stars">★★★★☆</span></a>
+  <a class="step" href="vm.html"><span class="n">3</span>
+    <span><b>Virtual Memory</b> (ชีท 3.2) — <b>เน้นที่สุด</b><br><span class="w">page fault · FIFO / OPT / LRU / LFU / MFU · page fault rate · Belady's anomaly · ข้อดีข้อเสีย</span>
+      <div class="progress" data-progress="vm"><i></i></div><span class="w ptxt"></span></span>
+    <span class="stars">★★★★★</span></a>
+  <a class="step" href="storage.html"><span class="n">4</span>
+    <span><b>Secondary Storage</b> (ชีท 3.3)<br><span class="w">free-space (bit vector) · allocation methods · disk scheduling (ไม่ได้พูดในคลิป) · โครงสร้างดิสก์ไม่ออก</span>
+      <div class="progress" data-progress="storage"><i></i></div><span class="w ptxt"></span></span>
+    <span class="stars">★★☆☆☆</span></a>
+  <a class="step" href="file.html"><span class="n">5</span>
+    <span><b>File System &amp; Protection</b> (ชีท 4.1–4.2)<br><span class="w">file property · สิทธิ์ rwx × owner/group/others · directory · access matrix · ระบบ secure (state machine)</span>
+      <div class="progress" data-progress="file"><i></i></div><span class="w ptxt"></span></span>
+    <span class="stars">★★★☆☆</span></a>
+  <a class="step" href="exam.html"><span class="n">✍</span>
+    <span><b>ข้อสอบจำลอง + เทคนิคเขียนตอบ</b><br><span class="w">ทำหลังเรียนครบ · มีโจทย์สุ่มไม่จำกัด</span>
+      <div class="progress" data-progress="exam"><i></i></div><span class="w ptxt"></span></span>
+    <span class="stars"></span></a>
+</div>
+
+<h2>อาจารย์พูดว่าอะไร "ออก" และอะไร "ไม่ออก"</h2>
+<div class="tblwrap">
+<table class="t left">
+  <tr><th>เรื่อง</th><th>อาจารย์พูดว่า</th><th>ฟัง</th></tr>
+  <tr><td>Page replacement</td><td><b>"ที่จะออกก็คือเรื่อง page replacement หลักๆ"</b> · "สิ่งที่คำนวณคือ page fault rate"</td><td><button class="ts" data-ts="1022"></button></td></tr>
+  <tr><td>อัลกอริทึมสลับเพจ</td><td><b>"ให้ไปเช็คดูทุกอัน ทำให้เข้าใจทุกอัน ข้อดีข้อเสียของแต่ละอัน และ anomaly จะเกิดขึ้นเมื่อไหร่"</b></td><td><button class="ts" data-ts="1292"></button></td></tr>
+  <tr><td>Resource allocation graph</td><td>ต้องวาดได้ ทำ allocation matrix / request matrix แบบใน lab <b>"ไปทวน concept อันนี้ ก็จะออกอยู่"</b></td><td><button class="ts" data-ts="184"></button></td></tr>
+  <tr><td>Banker's</td><td>safe/unsafe, safe sequence, "บท deadlock รอบนี้ก็จะไปจบที่ Banker's"</td><td><button class="ts" data-ts="237"></button></td></tr>
+  <tr><td>Logical vs physical address</td><td><b>"สิ่งที่ควรรู้ ต้องรู้"</b></td><td><button class="ts" data-ts="529"></button></td></tr>
+  <tr><td>First / best / worst fit</td><td>"มีข้อดีข้อเสียยังไง ไปทบทวน"</td><td><button class="ts" data-ts="562"></button></td></tr>
+  <tr><td>Swapping + PCB</td><td>save / load process control block "ก็จะถามนิดหน่อย"</td><td><button class="ts" data-ts="446"></button></td></tr>
+  <tr><td>File property + สิทธิ์</td><td>"minimum ต้องรู้" ชื่อ, ตำแหน่ง, ขนาด, สิทธิ์ r/w/x × owner/group/บุคคลทั่วไป ตั้งด้วย 3 bit</td><td><button class="ts" data-ts="1434"></button></td></tr>
+  <tr><td>ระบบ secure</td><td>"นิยามของระบบที่ secure คือ transition ของ state ไม่ไปยัง non-secure"</td><td><button class="ts" data-ts="1511"></button></td></tr>
+  <tr><td><span class="tag no">ไม่ออก</span> Hard disk</td><td>"เรื่อง hard disk เรื่องการหมุนแม่เหล็ก <b>จะไม่ออกสอบ</b>"</td><td><button class="ts" data-ts="1392"></button></td></tr>
+</table>
+</div>
+
+<h2>ใช้เว็บนี้ยังไง</h2>
+<div class="grid2">
+  <div class="box goal"><span class="t">🎯 เป้าหมาย</span>ทุกหัวข้อบอกก่อนว่าเรียนจบแล้วต้องทำอะไรได้</div>
+  <div class="box prof"><span class="t">🗣 อาจารย์พูด</span><span class="local-only">กด <button class="ts" data-ts="1022"></button> เพื่อฟังเสียงอาจารย์ช่วงนั้น (คลิปจะเปิดมุมขวาล่าง)</span><span class="hosted-only">คำพูดอาจารย์จากคลิป พร้อมบอกนาทีในคลิป (🎬 17:02)</span></div>
+  <div class="box"><span class="t">📄 สไลด์อาจารย์</span>ทุกภาพบอก<b>ชื่อไฟล์ · หน้าในชีท · หน้า PDF · เลขรูป</b> กดที่ภาพเพื่อขยาย<span class="local-only"> หรือกด "เปิด PDF หน้านี้" เพื่อดูไฟล์จริง</span></div>
+  <div class="box idea"><span class="t">💡 เข้าใจง่ายๆ</span>เปรียบเทียบกับเรื่องใกล้ตัว แล้วค่อยเข้าสู่นิยามแบบที่ต้องเขียนในข้อสอบ</div>
+  <div class="box"><span class="t">🕹 ลองเอง</span>เครื่องมือจำลองทีละขั้น เช่น page replacement (มีโหมดให้เราทายเอง), Banker's, RAG, disk</div>
+  <div class="box trap"><span class="t">⚠️ จุดที่มักพลาด</span>เรื่องที่คนมักทำผิดในข้อสอบ</div>
+  <div class="box exam"><span class="t">📝 เขียนตอบยังไง</span>ตัวอย่างคำตอบที่ได้คะแนนเต็มแบบ closed book</div>
+  <div class="box"><span class="t">✅ เช็คความเข้าใจ</span>แบบฝึกหัดตรวจให้ทันที เว็บจะจำว่าทำข้อไหนได้แล้ว (แถบสีเขียวด้านบน)</div>
+</div>
+
+<h2>Checklist ก่อนสอบ</h2>
+<p class="muted">ติ๊กได้ เว็บจะจำไว้ให้</p>
+<div class="card">
+  <label class="check"><input type="checkbox" id="c1"> เขียนเงื่อนไข deadlock 4 ข้อ อธิบาย necessary vs sufficient และวิธีทำลายแต่ละข้อได้</label>
+  <label class="check"><input type="checkbox" id="c2"> วาด resource allocation graph ↔ เขียน allocation/request matrix และบอกได้ว่า deadlock ไหม</label>
+  <label class="check"><input type="checkbox" id="c3"> ทำ Banker's ได้ครบ (Total, Need, safe sequence, request)</label>
+  <label class="check"><input type="checkbox" id="c4"> อธิบาย logical vs physical address และคำนวณ base/limit ได้</label>
+  <label class="check"><input type="checkbox" id="c5"> วาง first/best/worst fit ได้ และบอกข้อดีข้อเสีย</label>
+  <label class="check"><input type="checkbox" id="c6"> แปลง logical → physical ใน paging ได้ (ทั้งฐาน 10 และระดับบิต)</label>
+  <label class="check"><input type="checkbox" id="c7"> เรียงขั้นตอน page fault 6 ขั้นได้</label>
+  <label class="check"><input type="checkbox" id="c8"> ทำตาราง FIFO/OPT/LRU/LFU/MFU ได้ถูกต้องและเร็ว พร้อมคิด page fault rate</label>
+  <label class="check"><input type="checkbox" id="c9"> อธิบาย Belady's anomaly พร้อมยกตัวอย่าง</label>
+  <label class="check"><input type="checkbox" id="c10"> บอก file property และสิทธิ์ rwx แปลงเป็นเลข 3 หลักได้</label>
+  <label class="check"><input type="checkbox" id="c11"> อธิบายระบบ secure ด้วย state transition ได้</label>
+  <label class="check"><input type="checkbox" id="c12"> (เผื่อ) bit vector, allocation methods, disk scheduling, access matrix</label>
+</div>
+
+<h2>ไฟล์ที่ใช้</h2>
+<ul>
+  <li>ชีทอาจารย์อยู่ในโฟลเดอร์ <code>สไลที่หามา แต่ไม่แน่ใจว่าออกสไลไหนบ้าง</code> ส่วน<b>ชีท Deadlock (process_deadlock 2_4) ยังไม่มีไฟล์</b> ภาพในหน้า Deadlock จึงจับจากคลิปที่อาจารย์เลื่อนผ่าน (PDF หน้า 1–16 จาก 18)</li>
+  <li>สรุปแบบข้อความ: <code>สรุปแนวข้อสอบ_OS_Final.md</code> · โจทย์ 43 ข้อ: <code>แนวข้อสอบ_OS_Final_พร้อมเฉลย.md</code> · ถอดเสียง: <code>ถอดเสียงคลิป_OS_16OCT2026.txt</code></li>
+  <li>ตัวเลขทุกข้อในเว็บคำนวณด้วยโปรแกรมและตรวจกับเฉลยในชีทแล้ว กติกาตามชีทคือ <b>ถ้าเสมอกันให้ใช้ FIFO ตัดสิน</b></li>
+</ul>
+
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>

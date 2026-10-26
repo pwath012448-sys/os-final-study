@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 Virtual Memory ★ — ติว OS Final</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+<aside class="toc"></aside>
+<main>
+<h1>บทที่ 3 · Virtual Memory <span class="tag hot">เน้นที่สุด</span></h1>
+<p class="lead">ชีท <b>virtaul_memory(3_2)</b> หน้า 85–91 (7 หน้า) — อาจารย์เปิดในคลิปนาที 17:00–23:05</p>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด (2 ช่วงที่สำคัญที่สุดของคลิป)</span>
+<q>ที่จะออกก็คือเรื่อง page replacement หลักๆ … ให้ลด page fault ให้น้อยที่สุด สิ่งที่คำนวณคือ page fault rate, page fault rate น้อยแปลว่าดี การทำงานระบบจะเร็ว</q> <button class="ts" data-ts="1022"></button>
+<br><q>สิ่งที่จะออกก็คืออัลกอริทึมต่างๆ ในการสลับ ซึ่งสอนย้ำไปหลายรอบ ให้ไปเช็คดูทุกอัน ทำให้เข้าใจในทุกอัน แล้วก็ข้อดีข้อเสียของแต่ละอัน แล้วก็เวลาที่ anomaly จะเกิดขึ้นเมื่อไหร่ กับอันไหน</q> <button class="ts" data-ts="1292"></button></div>
+<div class="box goal"><span class="t">🎯 เรียนจบบทนี้ต้องทำได้</span>
+1) อธิบาย virtual memory / demand paging / valid-invalid bit
+<br>2) เรียงขั้นตอน page fault ได้
+<br>3) <b>ทำตาราง FIFO, OPT, LRU, LFU, MFU ได้ถูกและเร็ว</b>
+<br>4) คิด page fault rate
+<br>5) อธิบาย Belady's anomaly
+<br>6) บอกข้อดีข้อเสียของแต่ละอัลกอริทึม</div>
+
+<h2>3.1 Virtual memory คืออะไร</h2>
+<div class="slides">
+  <figure class="slide" data-src="vm" data-page="1" data-img="vm-p01.jpg" data-fig="รูปที่ 3.2.A ภาพรวม virtual memory" data-t="1036"></figure>
+</div>
+<div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: โต๊ะเรียนกับชั้นหนังสือ</span>
+โต๊ะ (= <b>RAM</b>) วางหนังสือได้ไม่กี่หน้า ส่วนชั้นหนังสือ (= <b>ดิสก์ / backing store</b>) เก็บได้ทั้งเล่ม เราเปิดอ่านเฉพาะหน้าที่ต้องใช้วางบนโต๊ะ พอโต๊ะเต็มก็เก็บบางหน้ากลับชั้นแล้วหยิบหน้าใหม่มาแทน
+<br>ผลคือเราเหมือนมีโต๊ะใหญ่เท่าทั้งเล่ม นี่คือ <b>virtual memory</b></div>
+<ul>
+  <li><b>Virtual memory</b> = ทำให้ผู้ใช้มองเห็นหน่วยความจำ (logical memory) ใหญ่กว่าหน่วยความจำจริง โดยใช้ <b>ดิสก์</b> กับ <b>memory map</b> ช่วย</li>
+  <li>เหตุผล: physical memory มีจำกัด ส่วนเทคนิค overlay หรือ dynamic loading ก็ยังมีข้อจำกัดอยู่</li>
+</ul>
+
+<h2>3.2 Demand paging และ valid–invalid bit ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>สมมุติทีละ 3 frame … ถูกโยนไปในฮาร์ด ที่ยังไม่อยู่ในเมมโมรีก็จะเป็น invalid</q> <button class="ts" data-ts="1085"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="vm" data-page="2" data-img="vm-p02.jpg" data-fig="รูปที่ 3.2.B swapping, 3.2.C valid-invalid" data-t="1110"></figure>
+</div>
+<ul>
+  <li><b>Demand paging</b> = โหลดเพจเข้าหน่วยความจำ<b>เฉพาะตอนที่ต้องใช้</b> (ใช้ swapping ช่วย)</li>
+  <li>page table มีบิต <b>v (valid)</b> = เพจอยู่ในหน่วยความจำจริง และ <b>i (invalid)</b> = ไม่อยู่ (อยู่ในดิสก์)</li>
+  <li>รูป 3.2.C: A → เฟรม 4, C → 6, F → 9 เป็น v ส่วน B, D, E, G, H เป็น i ถ้าอ้างถึงจะเกิด <b>page fault</b></li>
+</ul>
+
+<h2>3.3 ขั้นตอนเมื่อเกิด page fault ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>เกิด page fault OS จะดัก แล้วก็ทำการสั่ง เพราะว่า OS เป็นคนจัดการ virtual memory ก็ต้องรู้ว่าตำแหน่งจริงมันอยู่ที่ไหน ก็จะบอกว่าให้ไปโหลดตำแหน่งจริงมา แล้วมาเก็บใน RAM ใหม่ แล้ว loop ถัดมา CPU จะพยายาม request ใหม่ ก็จะไม่ fault แล้ว จะเป็น valid</q> <button class="ts" data-ts="1260"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="vm" data-page="3" data-img="vm-p03.jpg" data-fig="รูปที่ 3.2.D การจัดการ page fault" data-t="1256"></figure>
+</div>
+<pre>① reference                 อ้างเพจ (เช่นคำสั่ง load M)
+② trap                      page table เป็น i → trap ไปหา OS
+③ page is on backing store  OS หาว่าเพจอยู่ตรงไหนบนดิสก์
+④ bring in missing page     โหลดเพจเข้า free frame
+⑤ reset page table          ใส่เลขเฟรมใหม่ และเปลี่ยน bit เป็น v
+⑥ restart instruction       รันคำสั่งเดิมอีกครั้ง (คราวนี้ valid)</pre>
+<div class="box exam"><span class="t">📝 ท่องง่ายๆ</span><b>"อ้าง – ดัก – หา – โหลด – แก้ตาราง – รันใหม่"</b> และ <b>OS เป็นผู้จัดการ</b> page fault</div>
+
+<h2>3.4 Reference string</h2>
+<div class="slides">
+  <figure class="slide" data-src="vm" data-page="4" data-img="vm-p04.jpg" data-fig="3.2.2 reference string + FIFO (รูป 3.2.E)" data-t="1298"></figure>
+</div>
+<p>คือลำดับ<b>หมายเลขเพจ</b>ที่ถูกอ้าง ถ้าโจทย์ให้มาเป็น address ให้แปลงก่อน: page = address div ขนาดเพจ แล้ว<b>ยุบตัวที่ซ้ำติดกัน</b> (อ้างเพจเดิมซ้ำทันทีไม่มีทาง fault)</p>
+<div data-widget="addr2ref"></div>
+
+<h2>3.5 Page replacement ★★★</h2>
+<p>เมื่อเกิด page fault แล้ว<b>เฟรมเต็ม</b> ต้องเลือกเพจหนึ่งออก (victim) อัลกอริทึมต่างกันแค่ "<b>เลือกใครออก</b>"</p>
+<div class="box trap"><span class="t">⚠️ กติกาที่ชีทใช้ (ต้องทำตามในข้อสอบ)</span>
+1) เฟรมว่างตอนเริ่ม: เพจแรกๆ ที่เข้ามาก็<b>นับเป็น page fault</b>
+<br>2) ถ้ามีเพจที่เข้าเงื่อนไขให้เอาออกมากกว่า 1 เพจ → <b>ใช้ FIFO ตัดสิน</b> (เอาตัวที่เข้ามาก่อนออก)
+<br>3) แบบ counting (LFU/MFU): เพจที่ถูกเอาออกแล้วกลับเข้ามาใหม่ → <b>เริ่มนับ 1 ใหม่</b>
+<br>4) เขียนตารางแบบชีท: แถว = เฟรม, คอลัมน์ = การอ้างแต่ละครั้ง, ใส่ F ใต้คอลัมน์ที่ fault</div>
+
+<h3>FIFO — First-In, First-Out</h3>
+<div class="grid2">
+  <div><p><b>หลักการ</b>: เพจที่<b>เข้ามาก่อน</b>ออกก่อน (เหมือนคิว)</p>
+  <p><b>ต้องจดอะไร</b>: ลำดับที่เพจเข้ามา (ใช้ซ้ำ <b>ไม่</b>ทำให้ลำดับเปลี่ยน)</p>
+  <p><b>เคล็ดลับ</b>: เฟรมที่ถูกแทนจะวนลงไปทีละแถว F1 → F2 → F3 → F1 … เสมอ</p></div>
+  <div class="box idea"><span class="t">💡 เหมือน</span>คิวซื้อข้าว ใครมาก่อนได้ออกก่อน ไม่สนว่าใครสำคัญ</div>
+</div>
+<h3>OPT — Optimal</h3>
+<div class="slides">
+  <figure class="slide" data-src="vm" data-page="5" data-img="vm-p05.jpg" data-fig="FIFO 3/4 เฟรม (Belady) + OPT รูป 3.2.H" data-t="1352"></figure>
+</div>
+<div class="grid2">
+  <div><p><b>หลักการ</b> (อาจารย์ไฮไลต์ไว้): เพจที่<b>จะยังไม่ถูกใช้เป็นเวลานานที่สุด</b>ในอนาคต ให้เอาออกก่อน</p>
+  <p><b>ต้องทำอะไร</b>: มองไปข้างหน้าใน reference string ว่าแต่ละเพจในเฟรมจะถูกใช้อีกเมื่อไร ตัวที่<b>ไกลที่สุด</b>หรือ<b>ไม่ใช้อีกเลย</b> = ออก (ถ้าไม่ใช้อีกเลยหลายตัว ใช้ FIFO)</p></div>
+  <div class="box idea"><span class="t">💡 เหมือน</span>รู้ตารางสอบล่วงหน้า วิชาที่สอบช้าที่สุดก็เก็บหนังสือขึ้นชั้นก่อน ซึ่งทำได้เพราะรู้อนาคต ในระบบจริงรู้อนาคตไม่ได้ <b>จึงใช้จริงไม่ได้</b> ใช้เป็นเกณฑ์เทียบเท่านั้น</div>
+</div>
+<h3>LRU — Least Recently Used</h3>
+<div class="slides">
+  <figure class="slide" data-src="vm" data-page="6" data-img="vm-p06.jpg" data-fig="LRU รูป 3.2.I, LFU 3.2.J, MFU 3.2.K" data-t="1362"></figure>
+</div>
+<div class="grid2">
+  <div><p><b>หลักการ</b>: เพจที่<b>ไม่ได้ถูกใช้นานที่สุด (มองย้อนอดีต)</b> ออกก่อน</p>
+  <p><b>ต่างจาก FIFO</b>: ถ้าเพจที่อยู่มานานถูกใช้ซ้ำ จะถือว่า "เพิ่งใช้" (ชีทเขียนว่า "แสดงว่าเพจดังกล่าวนี้ยังถือว่าถูกใช้งานไม่นาน")</p>
+  <p><b>เคล็ดลับ</b>: มองย้อนจากคอลัมน์ปัจจุบันไปทางซ้าย เพจในเฟรมตัวไหนเจอ<b>ช้าที่สุด</b> = ออก</p></div>
+  <div class="box idea"><span class="t">💡 เหมือน</span>ล้างแอปที่ไม่ได้เปิดนานที่สุดในมือถือ</div>
+</div>
+<h3>LFU / MFU — Counting</h3>
+<div class="grid2">
+  <div><p><b>LFU (Least Frequently Used)</b>: เพจที่ถูกใช้<b>น้อยครั้งที่สุด</b>ออก</p>
+  <p><b>MFU (Most Frequently Used)</b>: เพจที่ถูกใช้<b>มากครั้งที่สุด</b>ออก (เหตุผล: ตัวที่นับน้อยน่าจะเพิ่งเข้ามาและยังจะใช้อีก)</p>
+  <p><b>ต้องจด</b>: จำนวนครั้งของแต่ละเพจ<b>ตั้งแต่เข้ามารอบนี้</b> ถ้าถูกเอาออกแล้วกลับเข้ามาใหม่ ให้เริ่มนับ 1</p></div>
+  <div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>counting หรือนับจำนวน นับความถี่ในการใช้งานในอดีต … least frequently used กับ most frequently used แต่ละอันเป็นยังไง ทบทวนการบ้าน ก็จะไม่สอนซ้ำ</q> <button class="ts" data-ts="1357"></button></div>
+</div>
+
+<h3>🕹 ลองเองทีละขั้น (เริ่มจากโจทย์การบ้าน)</h3>
+<p>กด <b>ถัดไป ▶</b> ทีละช่องแล้วอ่านเหตุผล จากนั้นเปลี่ยนเป็นโหมด <b>"ฝึกเอง"</b> ซึ่งทุกครั้งที่ต้องเอาเพจออก ระบบจะให้เราเลือกเอง เป็นวิธีฝึกที่ดีที่สุดก่อนสอบ</p>
+<div data-widget="pr" data-ref="2 3 2 1 5 2 4 5 3 2 5 2 1 4 3 5 2 4 1 3" data-frames="3" data-algo="FIFO"></div>
+
+<h3>วิธีทำในข้อสอบให้เร็วและไม่พลาด</h3>
+<div class="box exam"><span class="t">📝 เทคนิคเขียนตาราง</span>
+1) เขียน reference string เป็นหัวตาราง เว้นช่องให้เท่ากัน
+<br>2) <b>FIFO</b>: เขียนลำดับคิวไว้ข้างๆ (เช่น <code>[2,3,1]</code> แล้วตัดตัวหน้าทิ้งทุกครั้งที่แทน)
+<br>3) <b>LRU</b>: ตอนต้องแทน ให้มองย้อนไปทางซ้าย แล้วตัดเพจที่เจอทีละตัว ตัวสุดท้ายที่เหลือ = ออก
+<br>4) <b>OPT</b>: มองไปทางขวา ตัดเพจที่เจอทีละตัว ตัวสุดท้ายที่เหลือ (หรือตัวที่ไม่เจอเลย) = ออก
+<br>5) <b>LFU/MFU</b>: เขียนตัวเลขนับเล็กๆ ใต้ตาราง และรีเซ็ตเมื่อเพจถูกเอาออก
+<br>6) นับ F แล้วเขียน <b>page fault rate = F ÷ จำนวนการอ้าง</b> เป็น %
+<br>7) ตรวจเอง: <b>OPT ต้องน้อยที่สุดเสมอ</b> ถ้า LRU ได้น้อยกว่า OPT แปลว่าผิดแน่</div>
+
+<h2>3.6 Page fault rate ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>สิ่งที่คำนวณคือ page fault rate, page fault rate น้อยแปลว่าดี การทำงานระบบจะเร็ว</q> <button class="ts" data-ts="1073"></button></div>
+<pre>page fault rate = จำนวน page fault ÷ จำนวนการอ้างทั้งหมด
+ลายมืออาจารย์ในชีท (หน้า 88–89):
+  FIFO 3 เฟรม     = 15/20 = 75%
+  Belady 3 เฟรม   = 9/12  = 75%   (เขียนว่า 9/(9+3): fault 9 + hit 3)
+  Belady 4 เฟรม   = 10/12 = 83.3%</pre>
+
+<h2>3.7 Belady's anomaly ★</h2>
+<p><b>Belady's anomaly</b> = <b>เพิ่มจำนวนเฟรมแล้ว page fault กลับเพิ่มขึ้น</b> แทนที่จะลดลง ซึ่งเกิดกับ <b>FIFO</b></p>
+<p>ตัวอย่างชีท: <code>1 2 3 4 1 2 5 1 2 3 4 5</code> ใช้ 3 เฟรม = <b>9</b> faults แต่ 4 เฟรม = <b>10</b> faults (รูป 3.2.F, 3.2.G)</p>
+<div class="slides">
+  <figure class="slide" data-src="ch9" data-page="30" data-img="ch9-p30.jpg" data-fig="FIFO Illustrating Belady's Anomaly"></figure>
+</div>
+<div data-widget="belady"></div>
+<div class="box idea"><span class="t">💡 ทำไม LRU / OPT ไม่เกิด</span>LRU กับ OPT เป็น <b>stack algorithm</b>: เพจที่อยู่ในเฟรมตอนมี n เฟรม จะอยู่ในเฟรมตอนมี n+1 เฟรมด้วยเสมอ เพิ่มเฟรมจึงไม่มีทาง fault มากขึ้น ส่วน FIFO ไม่มีคุณสมบัตินี้ เพราะลำดับคิวเปลี่ยนไปเมื่อจำนวนเฟรมเปลี่ยน</div>
+<p>ลองเองในเครื่องมือด้านบน: เลือก preset "Belady — 3 เฟรม" แล้วเปลี่ยนเป็น 4 เฟรม</p>
+
+<h2>3.8 ข้อดี / ข้อเสียของแต่ละอัลกอริทึม ★</h2>
+<div class="tblwrap">
+<table class="t left">
+  <tr><th>Algorithm</th><th>หลักการ</th><th>ข้อดี</th><th>ข้อเสีย</th><th>Belady?</th></tr>
+  <tr><td><b>FIFO</b></td><td>เข้าก่อน ออกก่อน</td><td>ง่ายที่สุด overhead ต่ำ ใช้แค่คิว</td><td>อาจเอาเพจที่ยังใช้บ่อยออก ทำให้ fault มาก</td><td class="no">เกิด</td></tr>
+  <tr><td><b>OPT</b></td><td>ไม่ใช้นานสุดในอนาคต</td><td>fault น้อยที่สุดเท่าที่เป็นไปได้</td><td><b>ใช้จริงไม่ได้</b> เพราะต้องรู้อนาคต จึงใช้เป็นเกณฑ์เทียบ</td><td class="ok">ไม่เกิด</td></tr>
+  <tr><td><b>LRU</b></td><td>ไม่ได้ใช้นานสุด (อดีต)</td><td>ใกล้เคียง OPT ใช้หลัก locality</td><td>ต้องจดเวลาทุกครั้งที่อ้าง (counter/stack) จึงต้องมีฮาร์ดแวร์ช่วยและ overhead สูง</td><td class="ok">ไม่เกิด</td></tr>
+  <tr><td><b>LFU</b></td><td>ใช้น้อยครั้งสุด</td><td>เก็บเพจที่ใช้บ่อยไว้</td><td>เพจที่ใช้หนักช่วงแรกค้างอยู่นานแม้เลิกใช้แล้ว เพจใหม่ถูกไล่ง่าย และต้องมีตัวนับ</td><td class="muted">อาจเกิด</td></tr>
+  <tr><td><b>MFU</b></td><td>ใช้มากครั้งสุด</td><td>เหมาะกับงานที่ใช้เพจหนักช่วงหนึ่งแล้วเลิกใช้</td><td>มักไล่เพจที่ยังใช้หนักออก ผลมักแย่ และต้องมีตัวนับ</td><td class="muted">อาจเกิด</td></tr>
+</table>
+</div>
+
+<h2>3.9 โจทย์จากชีทและการบ้าน</h2>
+<h3>ตัวอย่างที่ 3.2.ก (หน้า 91)</h3>
+<div class="slides">
+  <figure class="slide" data-src="vm" data-page="7" data-img="vm-p07.jpg" data-fig="ตัวอย่างที่ 3.2.ก" data-t="1382"></figure>
+</div>
+<p>3 เฟรม, <code>2 3 2 1 5 2 4 5 3 2 5 2</code> → FIFO = <b>9</b>, LRU = <b>7</b>, OPT = <b>6</b> (เลือก preset "ตัวอย่าง 3.2.ก" ในเครื่องมือด้านบนเพื่อดูทีละขั้น)</p>
+<h3>การบ้าน (Classroom)</h3>
+<div class="slides local-only">
+  <figure class="slide" data-src="hw" data-img="hw-assignment.jpg" data-fig="โจทย์: แสดงวิธีทำ FIFO OPT LRU LFU, 3 frames"></figure>
+  <figure class="slide" data-src="hwans" data-img="hw-answer.jpg" data-fig="คำตอบที่ส่งไป — ถูกทุกข้อ"></figure>
+</div>
+<div class="box hosted-only"><span class="t">โจทย์การบ้าน (Classroom)</span>"FIFO OPT LRU LFU Page Replacement – เขียนด้วยลายมือ" แสดงวิธีทำ page replacement FIFO OPT LRU LFU มี 3 frames, reference string <code>2 3 2 1 5 2 4 5 3 2 5 2 1 4 3 5 2 4 1 3</code></div>
+<p>คำตอบที่ถูก: <b>FIFO = 17, OPT = 10, LRU = 15, LFU = 12</b> (MFU = 17)<span class="local-only"> ซึ่งตรงกับที่ส่งไปทุกข้อ</span></p>
+<div class="quiz">
+  <div class="q" data-type="num" data-answer="15"><div class="qt"><span class="qn">Q1</span>ชีท 3.2.2: <code>7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1</code> 3 เฟรม ใช้ FIFO ได้กี่ fault</div><div class="ans">15 ครั้ง (75%) — ลองใน widget: เลือก preset "ชีท 3.2.2"</div></div>
+  <div class="q" data-type="num" data-answer="9"><div class="qt"><span class="qn">Q2</span>สตริงเดียวกัน ใช้ OPT ได้กี่ fault</div><div class="ans">9 ครั้ง (45%)</div></div>
+  <div class="q" data-type="num" data-answer="12"><div class="qt"><span class="qn">Q3</span>สตริงเดียวกัน ใช้ LRU ได้กี่ fault</div><div class="ans">12 ครั้ง (60%)</div></div>
+  <div class="q" data-type="num" data-answer="13"><div class="qt"><span class="qn">Q4</span>สตริงเดียวกัน ใช้ LFU ได้กี่ fault</div><div class="ans">13 ครั้ง (65%) เคสนี้ใช้ FIFO ตัดสินหลายครั้ง</div></div>
+  <div class="q" data-type="mcq" data-answer="0"><div class="qt"><span class="qn">Q5</span>Belady's anomaly เกิดกับอัลกอริทึมใด</div><div class="opts">
+    <button class="opt">FIFO</button><button class="opt">OPT</button><button class="opt">LRU</button><button class="opt">ทั้ง OPT และ LRU</button></div>
+    <div class="fb">FIFO เพิ่มเฟรมแล้ว fault อาจเพิ่ม ส่วน OPT กับ LRU เป็น stack algorithm ไม่เกิด</div></div>
+  <div class="q" data-type="mcq" data-answer="2"><div class="qt"><span class="qn">Q6</span>ทำไม OPT จึงไม่ถูกใช้ในระบบจริง</div><div class="opts">
+    <button class="opt">เพราะ fault มากที่สุด</button><button class="opt">เพราะเกิด Belady's anomaly</button><button class="opt">เพราะต้องรู้ reference string ในอนาคต</button><button class="opt">เพราะต้องใช้ตัวนับ</button></div>
+    <div class="fb">OPT ต้องรู้ว่าเพจไหนจะไม่ถูกใช้นานที่สุดในอนาคต ซึ่งรู้ล่วงหน้าไม่ได้</div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">Q7</span>FIFO ต่างจาก LRU อย่างไร ยกตัวอย่างสถานการณ์ที่ทั้งสองเลือกเพจออกต่างกัน</div>
+    <div class="ans">FIFO ดู "ใครเข้ามาก่อน" ส่วน LRU ดู "ใครไม่ได้ใช้นานที่สุด" เช่น เฟรมมี 2 (เข้ามาก่อน), 3, 1 แล้วเพิ่งมีการอ้าง 2 ซ้ำ ถ้าต่อไปต้องแทน FIFO จะเอา 2 ออก (เข้ามาก่อน) แต่ LRU จะไม่เอา 2 ออก เพราะเพิ่งถูกใช้ จะเอา 3 ออกแทน (ดูการบ้านตำแหน่งที่ 5: FIFO เอา 2 ออก ส่วน LRU เอา 3 ออก)</div></div>
+</div>
+
+<h3>🎲 ฝึกไม่จำกัด</h3>
+<div data-widget="gen" data-kind="pr"></div>
+
+<h2>3.10 เสริมจากสไลด์อังกฤษ ch9 (อาจารย์ไม่ได้เปิดในคลิป)</h2>
+<div class="slides">
+  <figure class="slide" data-src="ch9" data-page="12" data-img="ch9-p12.jpg" data-fig="Page Fault (6 ขั้นแบบตำรา)"></figure>
+  <figure class="slide" data-src="ch9" data-page="16" data-img="ch9-p16.jpg" data-fig="Demand Paging Example (EAT)"></figure>
+  <figure class="slide" data-src="ch9" data-page="44" data-img="ch9-p44.jpg" data-fig="Thrashing"></figure>
+  <figure class="slide" data-src="ch9" data-page="48" data-img="ch9-p48.jpg" data-fig="Working-Set Model"></figure>
+</div>
+<ul>
+  <li><b>EAT ของ demand paging</b> = (1 − p) × memory access + p × page-fault service time เช่น 200 ns, 8 ms, p = 1/1000 → ≈ <b>8.2 µs</b> (ช้าลงราว 40 เท่า) page fault rate จึงต้องต่ำมาก</li>
+  <li><b>Thrashing</b> = โปรเซสใช้เวลาไปกับการสลับเพจเข้าออกมากกว่าทำงานจริง (มีเฟรมไม่พอ) ทำให้ CPU utilization ตก แล้ว OS ก็เพิ่มโปรเซสเข้าไปอีก ยิ่งแย่ลง</li>
+  <li><b>Working set</b> = ชุดเพจที่ถูกอ้างในหน้าต่าง Δ ล่าสุด ถ้าผลรวม working set ของทุกโปรเซส (D) มากกว่าจำนวนเฟรม (m) → thrashing ต้อง suspend บางโปรเซส</li>
+</ul>
+
+<h2>สรุปบทนี้ใน 1 นาที</h2>
+<div class="card"><ul>
+  <li>Virtual memory = logical ใหญ่กว่า physical โดยใช้ดิสก์ · demand paging · v/i bit</li>
+  <li>Page fault: อ้าง → trap → หาบนดิสก์ → โหลด → แก้ page table → รันใหม่ (OS จัดการ)</li>
+  <li>FIFO เข้าก่อนออกก่อน · OPT ไกลสุดในอนาคต · LRU นานสุดในอดีต · LFU/MFU นับครั้ง (รีเซ็ตเมื่อออก) · เสมอกันใช้ FIFO</li>
+  <li>page fault rate = fault ÷ การอ้างทั้งหมด</li>
+  <li>Belady: FIFO เพิ่มเฟรมแล้ว fault เพิ่ม (1 2 3 4 1 2 5 1 2 3 4 5: 9 → 10)</li>
+</ul></div>
+<div class="nextprev"><a href="memory.html">← บทที่ 2 Memory</a><a class="r" href="storage.html">บทที่ 4 Storage →</a></div>
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>

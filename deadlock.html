@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 Deadlock — ติว OS Final</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+<aside class="toc"></aside>
+<main>
+<h1>บทที่ 1 · Deadlock <span class="tag hot">ออกแน่</span></h1>
+<p class="lead">ชีท <b>process_deadlock(2_4)</b> (หัวข้อ 2.4) — อาจารย์เปิดเป็นไฟล์แรกในคลิปนาที 0:28–6:10 และบอกว่า "บท deadlock รอบนี้จะไปจบที่ Banker's" <button class="ts" data-ts="332"></button></p>
+<div class="box trap"><span class="t">⚠️ ยังไม่มีไฟล์ชีทนี้ในเครื่อง</span>ภาพในหน้านี้จับจากคลิป เพราะอาจารย์เลื่อนผ่านเร็ว บางภาพจึงมีกรอบ Zoom บังอยู่ (ทั้งไฟล์มี 18 หน้า เห็นในคลิป 16 หน้า) ถ้าหาไฟล์จาก Classroom ได้ ให้อ่านประกอบด้วย</div>
+
+<h2>1.1 Deadlock คืออะไร</h2>
+<div class="box goal"><span class="t">🎯 เรียนจบหัวข้อนี้ต้อง</span>อธิบายได้ว่า deadlock คืออะไร ยกตัวอย่างได้ และบอกขั้นตอนการใช้ทรัพยากรได้</div>
+<div class="slides wide">
+  <figure class="slide" data-src="dl" data-page="1" data-img="dl-p01-traffic.jpg" data-fig="Picture 2.4.A" data-t="28"></figure>
+  <figure class="slide" data-src="dl" data-page="1" data-img="dl-p01-cond.jpg" data-fig="Resource, process step, 2.4.1" data-t="44"></figure>
+</div>
+<div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: รถติดที่สี่แยก (รูป 2.4.A)</span>
+รถ 4 คันเข้าสี่แยกพร้อมกัน แต่ละคันจอดขวางช่องที่อีกคันต้องใช้ และทุกคันรอให้คันข้างหน้าไปก่อน ทุกคันจึงรอกันเป็นวงและไม่มีใครไปได้เลย นี่คือ <b>deadlock</b>
+<br>ในระบบปฏิบัติการ รถคือ <b>โปรเซส</b> ส่วนช่องถนนคือ <b>ทรัพยากร (resource)</b></div>
+<p><b>Deadlock</b> = สถานะที่กลุ่มโปรเซสต่างถือทรัพยากรไว้ แล้วรอทรัพยากรที่โปรเซสอื่นในกลุ่มถืออยู่ ทำให้ไม่มีใครทำงานต่อได้เลย</p>
+<ul>
+  <li><b>Resource</b> (ตามชีท): memory space, CPU cycles, files, I/O devices, …</li>
+  <li><b>ขั้นตอนที่โปรเซสใช้ทรัพยากร</b>: 1) <b>Request</b> → 2) <b>Use</b> → 3) <b>Release</b></li>
+  <li>Request/Release ทำผ่าน <b>system call</b> เช่น open/close files, allocate/free memory</li>
+</ul>
+
+<h2>1.2 เงื่อนไขที่จำเป็น 4 ข้อ ★</h2>
+<div class="box goal"><span class="t">🎯 ต้องทำได้</span>เขียนชื่อเงื่อนไขทั้ง 4 ข้อ อธิบายแต่ละข้อ และอธิบาย <b>necessary ≠ sufficient</b> ได้</div>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span>
+<q>Deadlock จะเกิดขึ้นได้ต้องอาศัยเงื่อนไขอะไร จำได้ไหม … เงื่อนไขจำเป็น necessary condition ต่างกับเงื่อนไขพอเพียง sufficient condition … เงื่อนไขครบแล้วอาจจะเกิดหรือไม่เกิดก็ได้ แต่ถ้าเงื่อนไขไม่ครบก็คือไม่เกิดแน่ๆ ฉะนั้นการที่เราจะไม่ให้เกิด deadlock เราก็ทำลายเงื่อนไขใดเงื่อนไขหนึ่ง</q>
+<button class="ts" data-ts="36"></button> <button class="ts" data-ts="96"></button></div>
+<div class="slides wide">
+  <figure class="slide" data-src="dl" data-page="1" data-img="dl-p01-circular.jpg" data-fig="2.4.1.1 Necessary Conditions" data-t="180"></figure>
+</div>
+<table class="t left">
+  <tr><th>เงื่อนไข</th><th>ความหมาย</th><th>เทียบกับรถติด</th></tr>
+  <tr><td><b>1. Mutual exclusion</b></td><td>ทรัพยากรใช้ได้ทีละโปรเซส แชร์ไม่ได้</td><td>ช่องถนนช่องหนึ่งรถจอดได้คันเดียว</td></tr>
+  <tr><td><b>2. Hold and wait</b></td><td>ถือทรัพยากรไว้แล้ว และรอทรัพยากรอื่นเพิ่ม</td><td>จอดขวางอยู่ แต่ยังรอช่องข้างหน้า</td></tr>
+  <tr><td><b>3. No preemption</b></td><td>ยึดทรัพยากรคืนจากโปรเซสไม่ได้ ต้องรอให้ปล่อยเอง</td><td>ยกรถคันอื่นออกไปไม่ได้</td></tr>
+  <tr><td><b>4. Circular wait</b></td><td>รอกันเป็นวง: P<sub>0</sub> รอ P<sub>1</sub>, P<sub>1</sub> รอ P<sub>2</sub>, …, P<sub>n</sub> รอ P<sub>0</sub></td><td>4 คันรอกันเป็นวงรอบสี่แยก</td></tr>
+</table>
+<div class="box idea"><span class="t">💡 Necessary vs sufficient — เทียบกับ "ไฟติด"</span>
+ไฟจะติดได้ต้องมี เชื้อเพลิง + ออกซิเจน + ความร้อน ครบ 3 อย่าง
+<br>• ถ้า<b>ขาดอย่างใดอย่างหนึ่ง → ไม่ติดแน่นอน</b> (นี่คือความหมายของ necessary)
+<br>• แต่ถ้า<b>มีครบ ก็ไม่ได้แปลว่าต้องติดเสมอ</b> (จึงไม่ใช่ sufficient)
+<br>Deadlock ก็เหมือนกัน: <b>ขาดข้อใดข้อหนึ่ง = ไม่เกิดแน่</b> แต่ครบ 4 ข้อ = <b>อาจ</b>เกิด → วิธีป้องกันจึงคือ "ทำลายเงื่อนไขสักข้อ"</div>
+<div class="box exam"><span class="t">📝 เขียนตอบแบบนี้ (closed book)</span>
+<pre>Deadlock เกิดได้เมื่อมีเงื่อนไขจำเป็นครบ 4 ข้อ คือ
+1) Mutual exclusion  ทรัพยากรใช้ได้ทีละโปรเซส
+2) Hold and wait     ถือทรัพยากรอยู่และรอทรัพยากรอื่น
+3) No preemption     ยึดทรัพยากรคืนไม่ได้
+4) Circular wait     P0 รอ P1, P1 รอ P2, ..., Pn รอ P0
+เป็น necessary ไม่ใช่ sufficient: ครบอาจเกิดหรือไม่เกิดก็ได้
+แต่ถ้าขาดข้อใดข้อหนึ่งไม่เกิดแน่นอน จึงป้องกันได้โดยทำลายเงื่อนไขใดเงื่อนไขหนึ่ง</pre></div>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="2"><div class="qt"><span class="qn">Q1</span>ข้อใดถูกต้อง</div><div class="opts">
+    <button class="opt">ถ้าเงื่อนไขครบ 4 ข้อ จะเกิด deadlock แน่นอน</button>
+    <button class="opt">ถ้ามี cycle ในกราฟ จะเกิด deadlock แน่นอนเสมอ</button>
+    <button class="opt">ถ้าขาดเงื่อนไขข้อใดข้อหนึ่ง จะไม่เกิด deadlock แน่นอน</button>
+    <button class="opt">Deadlock เกิดได้แม้ไม่มี hold and wait</button></div>
+    <div class="fb">เงื่อนไขทั้ง 4 เป็น <b>necessary</b> คือขาดข้อไหนก็ไม่เกิด แต่ครบแล้วไม่จำเป็นต้องเกิด ส่วน cycle จะเท่ากับ deadlock แน่นอนก็ต่อเมื่อทุกทรัพยากรมี instance เดียว</div></div>
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt"><span class="qn">Q2</span>"P1 ถือเครื่องพิมพ์อยู่ และรอสแกนเนอร์ที่ P2 ถือ" ตรงกับเงื่อนไขใดชัดที่สุด</div><div class="opts">
+    <button class="opt">Mutual exclusion</button><button class="opt">Hold and wait</button><button class="opt">No preemption</button><button class="opt">Circular wait</button></div>
+    <div class="fb">ถือ (hold) ของที่มีอยู่ แล้วรอ (wait) ของเพิ่ม = <b>hold and wait</b> แต่ถ้า P2 ก็รอเครื่องพิมพ์จาก P1 ด้วย จะกลายเป็น circular wait</div></div>
+</div>
+
+<h2>1.3 Resource-Allocation Graph (RAG) ★</h2>
+<div class="box goal"><span class="t">🎯 ต้องทำได้</span>อ่านและวาด RAG ได้ แปลงกราฟเป็น <b>allocation matrix / request matrix</b> แล้วบอกได้ว่ามี cycle หรือ deadlock ไหม</div>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span>
+<q>Circular wait เป็นการรอคอยเป็นวงกลม เราต้องสามารถวาด resource allocation graph ให้มีการรอคอยทรัพยากรเป็นวงกลม … ถ้า process ชี้ไปยัง resource คือ request ที่จะใช้ ถ้า resource ชี้ไปยัง process คือ process ได้ resource นั้นไปแล้ว … allocation matrix และ request matrix เป็นความสัมพันธ์ระหว่าง P<sub>i</sub> กับ R<sub>j</sub> ตามที่เราทำ lab ไป ก็ไปทวน concept อันนี้ ก็จะออกอยู่</q>
+<button class="ts" data-ts="184"></button></div>
+<div class="slides wide">
+  <figure class="slide" data-src="dl" data-page="2" data-img="dl-p02-rag.jpg" data-fig="2.4.1.2 Resource-Allocation Graph" data-t="224"></figure>
+  <figure class="slide" data-src="dl" data-page="2" data-img="dl-p02-pic24b.jpg" data-fig="Picture 2.4.B" data-t="229"></figure>
+  <figure class="slide" data-src="dl" data-page="3" data-img="dl-p03-pic24c-a.jpg" data-fig="Picture 2.4.C (บน)" data-t="231"></figure>
+  <figure class="slide" data-src="dl" data-page="3" data-img="dl-p03-pic24c-b.jpg" data-fig="Picture 2.4.C — 2 cycles" data-t="231"></figure>
+  <figure class="slide" data-src="dl" data-page="4" data-img="dl-p04-pic24d-a.jpg" data-fig="Picture 2.4.D (บน)" data-t="234"></figure>
+  <figure class="slide" data-src="dl" data-page="4" data-img="dl-p04-pic24d-b.jpg" data-fig="Picture 2.4.D — cycle แต่ไม่ deadlock" data-t="235"></figure>
+</div>
+<h3>อ่านกราฟให้เป็น</h3>
+<ul>
+  <li><b>วงกลม</b> = โปรเซส P<sub>i</sub> ส่วน<b>สี่เหลี่ยม</b> = ทรัพยากร R<sub>j</sub> และ<b>จุดในสี่เหลี่ยม</b> = จำนวน instance</li>
+  <li><b>P<sub>i</sub> → R<sub>j</sub></b> = P<sub>i</sub> <b>ขอ (request)</b> R<sub>j</sub> → ใส่ใน <b>Request matrix</b></li>
+  <li><b>R<sub>j</sub> → P<sub>i</sub></b> = P<sub>i</sub> <b>ถือ (hold / allocation)</b> R<sub>j</sub> อยู่ → ใส่ใน <b>Allocation matrix</b></li>
+</ul>
+<h3>ตัวอย่างในชีท (รูป 2.4.B) ทำทีละขั้น</h3>
+<p>ชีทให้ P = {P1, P2, P3}, R = {R1, R2, R3, R4} และ E = {P1→R1, P2→R3, R1→P2, R2→P2, R2→P1, R3→P3} โดยมี instance R1 = 1, R2 = 2, R3 = 1, R4 = 3</p>
+<div class="grid2">
+<div><b>ขั้น 1: เส้น R → P ใส่ Allocation</b>
+<pre>      R1 R2 R3 R4
+P1     0  1  0  0   (R2→P1)
+P2     1  1  0  0   (R1→P2, R2→P2)
+P3     0  0  1  0   (R3→P3)</pre></div>
+<div><b>ขั้น 2: เส้น P → R ใส่ Request</b>
+<pre>      R1 R2 R3 R4
+P1     1  0  0  0   (P1→R1)
+P2     0  0  1  0   (P2→R3)
+P3     0  0  0  0</pre></div>
+</div>
+<p><b>ขั้น 3: Available</b> = instance − ผลรวม Allocation = (1−1, 2−2, 1−1, 3−0) = <b>(0, 0, 0, 3)</b></p>
+<p><b>ขั้น 4: ตรวจ</b> P3 ไม่ได้ขออะไร → ทำงานจบแล้วคืน R3 → P2 ได้ R3 แล้วจบ คืน R1 กับ R2 → P1 ได้ R1 แล้วจบ → <b>ไม่เกิด deadlock</b> (และกราฟนี้ไม่มี cycle)</p>
+<p>ตรงกับ "Process State" ในชีท: P1 ใช้ R2 รอ R1 / P2 ใช้ R1, R2 รอ R3 / P3 ใช้ R3</p>
+<div class="box trap"><span class="t">⚠️ จำกฎ cycle ให้แม่น</span>
+• <b>ไม่มี cycle</b> → ไม่เกิด deadlock แน่นอน
+<br>• <b>มี cycle + ทุกทรัพยากรมี 1 instance</b> → deadlock แน่นอน
+<br>• <b>มี cycle + ทรัพยากรมีหลาย instance</b> → <b>อาจ</b>เกิดหรือไม่เกิดก็ได้ ต้องไล่ดู
+<br>รูป 2.4.C เพิ่มเส้น P3→R2 จึงเกิด 2 cycles และติด deadlock ส่วนรูป 2.4.D มี cycle P1→R1→P3→R2→P1 แต่ <b>P2 กับ P4 ไม่ได้รออะไร</b> เมื่อคืนทรัพยากรแล้ว cycle ก็คลายเอง</div>
+<div data-widget="rag" data-preset="0"></div>
+<p class="muted">ลองเลือก "รูป 2.4.C" แล้วดูว่ามี cycle อะไรบ้าง จากนั้นลองแก้ Request ของ P3 ที่ R2 จาก 1 เป็น 0 แล้วดูว่า deadlock หายไหม</p>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="3"><div class="qt"><span class="qn">Q3</span>ใน RAG ลูกศร R2 → P1 หมายความว่าอะไร</div><div class="opts">
+    <button class="opt">P1 ขอ R2</button><button class="opt">P1 ปล่อย R2</button><button class="opt">R2 รอ P1</button><button class="opt">P1 ได้ R2 ไปแล้ว (ถืออยู่)</button></div>
+    <div class="fb">R → P = <b>allocation</b> (ได้ไปแล้ว) ส่วน P → R = request</div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">Q4</span>รูป 2.4.C มี cycle อะไรบ้าง และเกิด deadlock หรือไม่ เพราะอะไร</div>
+    <div class="ans">มี 2 cycles คือ <b>P1→R1→P2→R3→P3→R2→P1</b> และ <b>P2→R3→P3→R2→P2</b> และ<b>เกิด deadlock</b> (P1, P2, P3) เพราะ Available = (0,0,0,3) ไม่มีโปรเซสไหนได้ตามที่ขอ: P1 รอ R1 (P2 ถือ), P2 รอ R3 (P3 ถือ), P3 รอ R2 (P1 กับ P2 ถือหมด) ทุกตัวรอกันเป็นวง</div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">Q5</span>รูป 2.4.D มี cycle แต่ทำไมไม่เกิด deadlock</div>
+    <div class="ans">เพราะ R1 กับ R2 มีอย่างละ <b>2 instances</b> และมีโปรเซสนอก cycle คือ P2 (ถือ R1) กับ P4 (ถือ R2) ที่ไม่ได้รออะไร เมื่อ P4 ทำงานจบแล้วคืน R2 → P3 ได้ R2 / เมื่อ P2 จบแล้วคืน R1 → P1 ได้ R1 → ทุกตัวจบได้ cycle จึงเป็นแค่<b>เงื่อนไขจำเป็น ไม่ใช่เงื่อนไขพอเพียง</b> เมื่อทรัพยากรมีหลาย instance</div></div>
+</div>
+
+<h2>1.4 วิธีจัดการ deadlock: prevention และ avoidance ★</h2>
+<div class="slides one">
+  <figure class="slide" data-src="dl" data-page="5" data-img="dl-p05-methods.jpg" data-fig="2.4.2 Method for handling deadlock" data-t="286"></figure>
+</div>
+<h3>Deadlock prevention = ทำลายเงื่อนไขข้อใดข้อหนึ่ง</h3>
+<table class="t left">
+  <tr><th>เงื่อนไข</th><th>วิธีทำลาย (ตามชีท)</th><th>หมายเหตุ</th></tr>
+  <tr><td>Mutual exclusion</td><td>ทำให้ทรัพยากรแชร์ได้</td><td>อาจารย์บอกว่าถ้าขัดกับระบบที่ออกแบบไว้ <b>ก็ต้องคงเงื่อนไขนี้ไว้</b> (เช่น เครื่องพิมพ์แชร์ไม่ได้) <button class="ts" data-ts="127"></button></td></tr>
+  <tr><td>Hold and wait</td><td><b>Request all resources</b> (ขอทั้งหมดในครั้งเดียว) หรือ <b>if wait → not hold</b> (ถ้าต้องรอ ห้ามถือของไว้)</td><td rowspan="3">อาจารย์: "สิ่งที่เราควบคุมได้คือ hold and wait, circular wait กับ preemption" และ no preemption เกี่ยวข้องกับ hold and wait <button class="ts" data-ts="140"></button></td></tr>
+  <tr><td>No preemption</td><td><b>Allow preemption</b> (ยึดทรัพยากรคืนได้)</td></tr>
+  <tr><td>Circular wait</td><td><b>Order no.</b> ให้เลขลำดับทรัพยากร แล้วขอได้ตามลำดับเลขจากน้อยไปมากเท่านั้น จึงวนเป็นวงไม่ได้</td></tr>
+</table>
+<h3>Deadlock avoidance = ไม่ให้ระบบเข้า unsafe state</h3>
+<ul>
+  <li><b>Safe state</b> = มีลำดับการรัน (<b>safe sequence</b>) อย่างน้อยหนึ่งลำดับ ที่ทุกโปรเซสได้ทรัพยากรครบแล้วจบได้ → ไม่เกิด deadlock</li>
+  <li><b>Unsafe state</b> = หา safe sequence ไม่ได้ ซึ่ง<b>ยังไม่ใช่ deadlock</b> แต่มีโอกาสเกิด</li>
+  <li>เครื่องมือหลักคือ <b>Banker's algorithm</b>: ก่อนให้ทรัพยากรต้องลองคำนวณก่อนว่าให้แล้วยัง safe ไหม <button class="ts" data-ts="243"></button></li>
+</ul>
+<div class="box idea"><span class="t">💡 ทำไมชื่อ Banker</span>ธนาคารมีเงินสดจำกัด ลูกค้าแต่ละรายประกาศวงเงินสูงสุด (Max) ไว้ ธนาคารจะปล่อยกู้เพิ่มก็ต่อเมื่อมั่นใจว่ายังมีลำดับที่ทุกคนกู้ได้ครบแล้วคืนเงินได้ ถ้าปล่อยแล้วอาจมีคนติดค้างกันหมด ก็ให้รอก่อน</div>
+
+<h2>1.5 Banker's Algorithm ★</h2>
+<div class="box goal"><span class="t">🎯 ต้องทำได้</span>หา Total, Need และ safe sequence ได้ และตอบได้ว่าคำขอ (request) ให้ได้หรือไม่ พร้อมเหตุผล</div>
+<div class="slides wide">
+  <figure class="slide" data-src="dl" data-page="5" data-img="dl-p06-struct.jpg" data-fig="โครงสร้างข้อมูล: Resource, Process, Available, Max" data-t="308"></figure>
+  <figure class="slide" data-src="dl" data-page="6" data-img="dl-p06-need.jpg" data-fig="Need = Max − Allocation" data-t="314"></figure>
+  <figure class="slide" data-src="dl" data-page="7" data-img="dl-p07-safety.jpg" data-fig="Safety algorithm ขั้น 2–4" data-t="320"></figure>
+</div>
+<h3>โครงสร้างข้อมูล (n โปรเซส, m ชนิดทรัพยากร)</h3>
+<ul>
+  <li><b>Available</b> (เวกเตอร์ m ช่อง) = ที่เหลือว่างตอนนี้</li>
+  <li><b>Max</b> (n × m) = ที่แต่ละโปรเซสประกาศว่าจะใช้มากที่สุด</li>
+  <li><b>Allocation</b> (n × m) = ที่ได้ไปแล้ว</li>
+  <li><b>Need</b> = <b>Max − Allocation</b> (ที่ยังต้องการอีก) เช่น N<sub>12</sub> = M<sub>12</sub> − A<sub>12</sub></li>
+</ul>
+<h3>Safety algorithm (ตามชีท)</h3>
+<pre>1. Work = Available,  Finish[i] = false ทุกตัว
+2. หา i ที่ Finish[i] = false และ Need[i] ≤ Work
+   ถ้าไม่มี ไปขั้น 4
+3. Work = Work + Allocation[i],  Finish[i] = true  แล้วกลับไปขั้น 2
+4. ถ้า Finish[i] = true ทุกตัว → safe state  ไม่งั้น → unsafe state</pre>
+<h3>Resource-request algorithm (เมื่อ P<sub>i</sub> ขอเพิ่ม)</h3>
+<pre>1. Request ≤ Need[i] ?      ไม่ใช่ → error (ขอเกินที่ประกาศ)
+2. Request ≤ Available ?    ไม่ใช่ → ต้องรอ (Available ไม่พอ)
+3. สมมติให้ไปก่อน:  Available −= Request, Allocation[i] += Request, Need[i] −= Request
+   แล้วรัน safety → safe = ให้ได้ / unsafe = ยกเลิก ให้รอ</pre>
+
+<h3>ตัวอย่างในชีท (หน้า 58–61) ทำทีละขั้น</h3>
+<div class="slides wide">
+  <figure class="slide" data-src="dl" data-page="8" data-img="dl-p08-example.jpg" data-fig="ข้อมูลตัวอย่าง (Solution)" data-t="326"></figure>
+  <figure class="slide" data-src="dl" data-page="9" data-img="dl-p09-needtable.jpg" data-fig="ตาราง Need + Work" data-t="330"></figure>
+  <figure class="slide" data-src="dl" data-page="10" data-img="dl-p10-requests.jpg" data-fig="safe sequence + request P2, P4, P1" data-t="336"></figure>
+  <figure class="slide" data-src="dl" data-page="11" data-img="dl-p11-unsafe.jpg" data-fig="P1 ขอ (0,2,0) → unsafe" data-t="338"></figure>
+</div>
+<div class="grid3">
+<div><b>Allocation</b><pre>    R1 R2 R3
+P1   0  1  0
+P2   2  0  0
+P3   3  0  2
+P4   2  1  1
+P5   0  0  2</pre></div>
+<div><b>Max</b><pre>    R1 R2 R3
+P1   7  5  3
+P2   3  2  2
+P3   9  0  2
+P4   2  2  2
+P5   4  3  3</pre></div>
+<div><b>Need = Max − Allocation</b><pre>    R1 R2 R3
+P1   7  4  3
+P2   1  2  2
+P3   6  0  0
+P4   0  1  1
+P5   4  3  1</pre></div>
+</div>
+<p>Available = (3, 3, 2) → Total = Allocation รวม + Available = (7+3, 2+3, 5+2) = <b>(10, 5, 7)</b></p>
+<pre>Work = (3,3,2)
+P1 need 7,4,3 ≤ 3,3,2 ?  ไม่ได้ ข้าม
+P2 need 1,2,2 ≤ 3,3,2 ?  ได้  → Work = 3,3,2 + 2,0,0 = (5,3,2)
+P3 need 6,0,0 ≤ 5,3,2 ?  ไม่ได้ ข้าม
+P4 need 0,1,1 ≤ 5,3,2 ?  ได้  → Work = 5,3,2 + 2,1,1 = (7,4,3)
+P5 need 4,3,1 ≤ 7,4,3 ?  ได้  → Work = 7,4,3 + 0,0,2 = (7,4,5)
+(วนรอบ 2)
+P1 need 7,4,3 ≤ 7,4,5 ?  ได้  → Work = (7,5,5)
+P3 need 6,0,0 ≤ 7,5,5 ?  ได้  → Work = (10,5,7)
+Safe sequence = &lt;P2, P4, P5, P1, P3&gt;   ✓ ตรงกับชีท</pre>
+<p><b>คำขอในชีท</b> (ทำต่อเนื่องกัน):</p>
+<ul>
+  <li><b>P2 ขอ (1,0,2)</b>: ≤ Need (1,2,2) ✓ และ ≤ Available (3,3,2) ✓ → สมมติให้: Available = <b>(2,3,0)</b> → ตรวจแล้วยัง safe &lt;P2, P4, P5, P1, P3&gt; → <b class="ok">ให้ได้</b></li>
+  <li><b>P4 ขอ (3,3,0)</b>: Available (2,3,0) ไม่พอ → <b class="no">ให้ไม่ได้</b> ("Available not enough" ตามชีท) <span class="muted">(ถ้าตรวจตามอัลกอริทึมเต็ม ข้อ 1 ก็ไม่ผ่านแล้ว เพราะ Need ของ P4 คือ (0,1,1))</span></li>
+  <li><b>P1 ขอ (0,2,0)</b>: Available พอ แต่พอ "simulate new state" แล้ว Available = (2,1,0) ไม่มีใครผ่านเลย → <b class="no">unsafe จึงให้ไม่ได้</b></li>
+</ul>
+<div data-widget="banker" data-preset="0"></div>
+<div class="box trap"><span class="t">⚠️ จุดที่มักพลาด</span>
+• ลืมหา <b>Need</b> แล้วไปเทียบ Max กับ Work แทน (ต้องใช้ Need)
+<br>• ตอนให้ทำงานจบ ต้องบวก <b>Allocation</b> เข้า Work ไม่ใช่บวก Max หรือ Need
+<br>• ชีทเรียก P1–P5 ส่วนตำราใช้ P0–P4 ให้ใช้ชื่อตามโจทย์
+<br>• safe sequence มีได้หลายแบบ ถ้าทุกขั้นผ่าน Need ≤ Work ก็ถูก แต่<b>ต้องแสดง Work ทุกขั้น</b></div>
+<h3>แบบฝึกหัดจากชีท</h3>
+<div class="slides wide">
+  <figure class="slide" data-src="dl" data-page="12" data-img="dl-p12-ex24b.jpg" data-fig="Example 2.4.B" data-t="342"></figure>
+  <figure class="slide" data-src="dl" data-page="13" data-img="dl-p13-ex24c.jpg" data-fig="Example 2.4.C" data-t="343"></figure>
+</div>
+<div class="quiz">
+  <div class="q" data-type="text" data-answer="9,3,6|(9,3,6)|936"><div class="qt"><span class="qn">Q6</span>Example 2.4.B: Total instances ของ R1, R2, R3 คือเท่าไร (ตอบเช่น 9,3,6)</div>
+    <div class="ans">Total = ผลรวม Allocation + Available = (1+6+2+0, 0+1+1+0, 0+2+1+2) + (0,1,1) = <b>(9, 3, 6)</b></div></div>
+  <div class="q" data-type="text" data-answer="P2P3P4P1|2341"><div class="qt"><span class="qn">Q7</span>Example 2.4.B: safe sequence คืออะไร (ไล่ P1→P4 วนแบบชีท)</div>
+    <div class="ans"><pre>Need: P1 2,2,2  P2 0,0,1  P3 1,0,3  P4 4,2,0
+Work 0,1,1: P1 ✗ · P2 ✓ → 6,2,3 · P3 ✓ → 8,3,4 · P4 ✓ → 8,3,6
+รอบ 2: P1 ✓ → 9,3,6
+safe sequence = &lt;P2, P3, P4, P1&gt;</pre></div></div>
+  <div class="q" data-type="text" data-answer="P1P3P4P5P2|13452"><div class="qt"><span class="qn">Q8</span>Example 2.4.C: safe sequence คืออะไร</div>
+    <div class="ans"><pre>Total = (7,2,6)
+Need: P1 0,0,0  P2 2,0,2  P3 0,0,0  P4 1,0,0  P5 0,0,2
+Work 0,0,0: P1 ✓ → 0,1,0 · P2 ✗ · P3 ✓ → 3,1,3 · P4 ✓ → 5,2,4 · P5 ✓ → 5,2,6
+รอบ 2: P2 ✓ → 7,2,6
+safe sequence = &lt;P1, P3, P4, P5, P2&gt;</pre></div></div>
+</div>
+<p>ฝึกเพิ่มด้วยโจทย์สุ่ม (ระบบตรวจ safe sequence ที่เราตอบได้ทุกแบบที่ถูก):</p>
+<div data-widget="gen" data-kind="banker"></div>
+
+<h2>1.6 Deadlock detection</h2>
+<div class="slides wide">
+  <figure class="slide" data-src="dl" data-page="14" data-img="dl-p14-waitfor.jpg" data-fig="2.4.2.3 Deadlock Detection (wait-for graph)" data-t="344"></figure>
+  <figure class="slide" data-src="dl" data-page="15" data-img="dl-p15-detalgo.jpg" data-fig="Detection algorithm" data-t="346"></figure>
+  <figure class="slide" data-src="dl" data-page="16" data-img="dl-p16-detex.jpg" data-fig="ตัวอย่าง detection" data-t="347"></figure>
+</div>
+<ul>
+  <li><b>ทรัพยากร instance เดียว:</b> ใช้ RAG แล้วยุบเป็น <b>wait-for graph</b> (เอาโหนด R ออก เหลือ P<sub>i</sub> → P<sub>j</sub> = P<sub>i</sub> รอ P<sub>j</sub>) ถ้ามี <b>cycle = deadlock</b></li>
+  <li><b>หลาย instance:</b> ใช้อัลกอริทึมคล้าย safety แต่ใช้ <b>Request</b> แทน Need และถ้า Finish[i] = false ที่ตัวไหน แปลว่าตัวนั้นติด deadlock</li>
+</ul>
+<p>ตัวอย่างในชีท: Resource = (7, 2, 6) ให้ข้อ 1 ตรวจ deadlock และข้อ 2 ถ้า P3 ขอ R3 เพิ่ม 1 instance จะเป็นอย่างไร</p>
+<div data-widget="banker" data-mode="detect" data-preset="0"></div>
+<div class="quiz">
+  <div class="q" data-type="open"><div class="qt"><span class="qn">Q9</span>ตัวอย่างหน้า 66: ข้อ 1 เกิด deadlock ไหม และข้อ 2 (P3 ขอ R3 เพิ่ม 1) เป็นอย่างไร</div>
+    <div class="ans"><b>ข้อ 1:</b> Work (0,0,0) → P1 ✓ (0,1,0) → P3 ✓ (3,1,3) → P4 ✓ (5,2,4) → P5 ✓ (5,2,6) → P2 ✓ (7,2,6) <b>ไม่เกิด deadlock</b>
+    <br><b>ข้อ 2:</b> Request ของ P3 เป็น (0,0,1) → P1 ✓ ได้ Work (0,1,0) แต่ P2 (2,0,2), P3 (0,0,1), P4 (1,0,0), P5 (0,0,2) ไม่มีใครผ่าน → <b>deadlock: P2, P3, P4, P5</b></div></div>
+</div>
+
+<h2>สรุปบทนี้ใน 1 นาที</h2>
+<div class="card">
+<ul>
+  <li>เงื่อนไข 4 ข้อ: ME, Hold &amp; wait, No preemption, Circular wait (necessary ไม่ใช่ sufficient)</li>
+  <li>RAG: P→R = request, R→P = allocation; instance เดียว + cycle = deadlock</li>
+  <li>Prevention: ขอทั้งหมด / ถ้ารอห้ามถือ, ยอม preempt, ให้เลขลำดับ</li>
+  <li>Avoidance: safe/unsafe → Banker's: Need = Max − Alloc, Work += Alloc</li>
+  <li>Request: ≤ Need → ≤ Available → ลองให้ → ยัง safe ไหม</li>
+  <li>Detection: แบบ safety แต่ใช้ Request ตัวที่ Finish = false = ติด deadlock</li>
+</ul>
+</div>
+<div class="nextprev"><a href="index.html">← หน้าแรก</a><a class="r" href="memory.html">บทที่ 2 Memory →</a></div>
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>

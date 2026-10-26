@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 Secondary Storage — ติว OS Final</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+<aside class="toc"></aside>
+<main>
+<h1>บทที่ 4 · Secondary Storage <span class="tag">บางส่วน</span></h1>
+<p class="lead">ชีท <b>secondary_storage_mng3_3</b> หน้า 95–104 (10 หน้า) — อาจารย์เปิดในคลิปแค่ช่วงสั้นๆ นาที 23:05–23:50</p>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>Secondary storage เรื่อง hard disk เรื่องการหมุนแม่เหล็ก <b>จะไม่ออกสอบ</b>นะครับ</q> <button class="ts" data-ts="1392"></button>
+<br><span class="muted">ระหว่างนั้นอาจารย์เปิดหน้า free-space management (bit vector) ผ่านๆ ส่วน allocation methods กับ disk scheduling ไม่ได้พูดถึงในคลิป</span></div>
+<div class="box goal"><span class="t">🎯 เป้าหมาย (เผื่อออก)</span>เขียน bit vector ตามรูปแบบชีทได้ รู้วิธีจัดการพื้นที่ว่าง 4 แบบกับ allocation 3 แบบ และคำนวณ disk scheduling เป็น</div>
+
+<h2>4.1 ทำไมต้องมีหน่วยความจำสำรอง</h2>
+<div class="slides">
+  <figure class="slide" data-src="disk" data-page="1" data-img="disk-p01.jpg" data-fig="3.3 + 3.3.1 Disk structure + 3.3.2 free-space" data-t="1406"></figure>
+</div>
+<ul>
+  <li>หน่วยความจำหลักมีข้อจำกัด 2 ข้อ: <b>(1)</b> พื้นที่น้อย เก็บถาวรไม่ได้ <b>(2)</b> เป็น <b>volatile</b> ไฟดับแล้วข้อมูลหาย</li>
+  <li>หน่วยความจำสำรอง เช่น magnetic tape, disk <span class="tag no">โครงสร้างดิสก์: track, cylinder, sector, head — ไม่ออก</span></li>
+</ul>
+
+<h2>4.2 Free-space management</h2>
+<div class="slides">
+  <figure class="slide" data-src="disk" data-page="2" data-img="disk-p02.jpg" data-fig="รูปที่ 3.3.B bit vector, 3.3.C linked list"></figure>
+</div>
+<table class="t left">
+  <tr><th>วิธี</th><th>หลักการ</th></tr>
+  <tr><td><b>1. Bit vector (bit map)</b></td><td>1 บิตต่อ 1 บล็อก — <b>ชีทกำหนด ว่าง = 0, ถูกใช้ = 1</b></td></tr>
+  <tr><td><b>2. Linked list</b></td><td>บล็อกว่างแรกเป็น <b>free-space list head</b> แต่ละบล็อกชี้ไปบล็อกว่างถัดไป บล็อกสุดท้ายชี้ null</td></tr>
+  <tr><td><b>3. Grouping</b></td><td>บล็อกว่างแรกเก็บ address ของบล็อกว่าง N บล็อก และบล็อกสุดท้ายในกลุ่มเก็บ address ของ N บล็อกถัดไป</td></tr>
+  <tr><td><b>4. Counting</b></td><td>นับเป็นกลุ่มบล็อกว่างที่<b>ติดกัน</b> (บล็อกเริ่ม + จำนวนบล็อก)</td></tr>
+</table>
+<div data-widget="bitvec"></div>
+<div class="box trap"><span class="t">⚠️ ระวัง</span>ตำราฝรั่ง (Silberschatz) ใช้ <b>ว่าง = 1</b> แต่ชีทอาจารย์ใช้ <b>ว่าง = 0</b> ให้ตอบตามชีท ตัวอย่างในชีท: 12 บล็อก ว่าง 2, 3, 4, 6, 8, 9, 10 → <b class="mono">110001010001</b></div>
+<div class="quiz">
+  <div class="q" data-type="text" data-answer="1001100011011101"><div class="qt"><span class="qn">Q1</span>16 บล็อก (0–15) บล็อกว่างคือ 1, 2, 5, 6, 7, 10, 14 จงเขียน bit vector ตามชีท</div>
+    <div class="ans"><b class="mono">1001100011011101</b> (ว่าง = 0)</div></div>
+</div>
+
+<h2>4.3 Allocation methods</h2>
+<div class="slides">
+  <figure class="slide" data-src="disk" data-page="3" data-img="disk-p03.jpg" data-fig="รูปที่ 3.3.D contiguous"></figure>
+  <figure class="slide" data-src="disk" data-page="4" data-img="disk-p04.jpg" data-fig="รูปที่ 3.3.E linked, 3.3.F indexed"></figure>
+  <figure class="slide" data-src="disk" data-page="5" data-img="disk-p05.jpg" data-fig="รูปที่ 3.3.G FAT + 3.3.4 disk scheduling"></figure>
+</div>
+<table class="t left">
+  <tr><th>แบบ</th><th>directory เก็บ</th><th>ตัวอย่างในชีท</th><th>ข้อดี / ข้อเสีย</th></tr>
+  <tr><td><b>Contiguous</b></td><td>start + length</td><td>data1: start 0, length 3 → บล็อก 0, 1, 2</td><td>อ่านเร็ว เข้าตรงได้ / เกิด external fragmentation และต้องเลือก hole (first/best/worst fit)</td></tr>
+  <tr><td><b>Linked</b></td><td>start + end</td><td>Data2: 11 → 14 → 16 → 5 → 4 (−1 = จบ)</td><td>ไม่มี external fragmentation / เข้าตรงไม่ได้ ต้องไล่ทีละบล็อก และเสียที่เก็บ pointer</td></tr>
+  <tr><td><b>Indexed</b></td><td>index block</td><td>Data3: index block 15 = [17, 13, 2, 10]</td><td>เข้าตรงได้ / เสียบล็อกทำ index</td></tr>
+  <tr><td><b>FAT</b></td><td>start block</td><td>200 → 515 → 300 → end-of-file</td><td>แบบ linked แต่เก็บ pointer ไว้ในตาราง</td></tr>
+</table>
+
+<h2>4.4 Disk scheduling <span class="tag">ไม่ได้พูดในคลิป</span></h2>
+<p>นับ <b>total head movement</b> = ระยะที่หัวอ่านเคลื่อนที่รวมกัน ตัวอย่างในชีท: 200 tracks (0–199), หัวอ่านอยู่ที่ 53, คิว 98, 183, 37, 122, 14, 124, 65, 67 และกำลังไปทาง 0</p>
+<div class="slides">
+  <figure class="slide" data-src="disk" data-page="6" data-img="disk-p06.jpg" data-fig="FCFS (3.3.H), SSTF (3.3.I)"></figure>
+  <figure class="slide" data-src="disk" data-page="7" data-img="disk-p07.jpg" data-fig="SCAN (3.3.J)"></figure>
+  <figure class="slide" data-src="disk" data-page="8" data-img="disk-p08.jpg" data-fig="C-SCAN (3.3.K), LOOK"></figure>
+  <figure class="slide" data-src="disk" data-page="9" data-img="disk-p09.jpg" data-fig="LOOK (3.3.L), C-LOOK (3.3.M)"></figure>
+  <figure class="slide" data-src="disk" data-page="10" data-img="disk-p10.jpg" data-fig="C-LOOK = 326"></figure>
+</div>
+<table class="t left">
+  <tr><th>วิธี</th><th>หลักการ</th><th>ชีท</th></tr>
+  <tr><td>FCFS</td><td>ตามลำดับคิว</td><td>640</td></tr>
+  <tr><td>SSTF</td><td>ไปที่ track ใกล้ที่สุดก่อนเสมอ</td><td>236</td></tr>
+  <tr><td>SCAN</td><td>วิ่งไปจนสุดปลาย (0) แล้วกลับมาบริการอีกทาง</td><td>236</td></tr>
+  <tr><td>C-SCAN</td><td>บริการทางเดียว ถึงปลายแล้วกระโดดไปอีกปลาย (ชีท<b>นับระยะกระโดด</b> 0 → 199 ด้วย)</td><td>386</td></tr>
+  <tr><td>LOOK</td><td>แบบ SCAN แต่ไม่ต้องไปถึงปลาย กลับที่ request สุดท้าย</td><td>208</td></tr>
+  <tr><td>C-LOOK</td><td>แบบ C-SCAN แต่กระโดดจาก request สุดท้ายไป request ไกลสุดอีกฝั่ง</td><td>326</td></tr>
+</table>
+<div data-widget="disk"></div>
+<div data-widget="gen" data-kind="disk"></div>
+
+<div class="nextprev"><a href="vm.html">← บทที่ 3 Virtual Memory</a><a class="r" href="file.html">บทที่ 5 File &amp; Protection →</a></div>
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ข้อสอบจำลอง — ติว OS Final</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+<aside class="toc"></aside>
+<main>
+<h1>ข้อสอบจำลอง + เทคนิคเขียนตอบ</h1>
+<p class="lead">ทำหลังจากเรียนครบทุกบท ลองเขียนคำตอบลงกระดาษก่อน (เหมือนสอบ closed book) แล้วค่อยกดดูเฉลย ข้อที่เป็นตัวเลขกดตรวจได้ทันที</p>
+
+<h2>เทคนิคทำข้อสอบ closed book</h2>
+<div class="grid2">
+  <div class="box exam"><span class="t">📝 ข้อบรรยาย</span>
+  1) ขึ้นต้นด้วย<b>นิยาม 1 ประโยค</b> ใช้คำศัพท์อังกฤษตามชีท (เช่น mutual exclusion, safe state)
+  <br>2) ตามด้วย<b>หัวข้อย่อย/ลำดับขั้น</b>
+  <br>3) ปิดด้วย<b>ตัวอย่างหรือรูป</b> (RAG, memory map, state diagram)</div>
+  <div class="box exam"><span class="t">🧮 ข้อคำนวณ</span>
+  1) เขียนสิ่งที่โจทย์ให้มาก่อน
+  <br>2) <b>แสดงทุกขั้น</b> (ตาราง page replacement ครบทุกคอลัมน์, Work ทุกขั้นของ Banker's, สูตร f × size + d)
+  <br>3) ขีดเส้นใต้คำตอบสุดท้าย พร้อมหน่วย (ครั้ง, %, K, tracks)</div>
+  <div class="box trap"><span class="t">⚠️ จุดที่เสียคะแนนบ่อย</span>
+  • ลืมนับ fault ช่วงเฟรมว่างตอนเริ่ม
+  <br>• OPT/LFU เสมอกันแล้วไม่ใช้ FIFO ตัดสิน
+  <br>• LFU ลืมรีเซ็ตตัวนับเมื่อเพจถูกเอาออก
+  <br>• Banker's บวก Need แทน Allocation
+  <br>• paging เอา p ไปคูณ page size แทน f
+  <br>• bit vector ใช้ว่าง = 1 (ชีทใช้ว่าง = 0)</div>
+  <div class="box idea"><span class="t">⏱ แบ่งเวลา</span>ทำข้อคำนวณที่มั่นใจก่อน (page replacement, Banker's, paging) เพราะได้คะแนนแน่นอน แล้วค่อยเขียนข้อบรรยาย ถ้ามีเวลาเหลือ ให้ทวนตาราง page replacement โดยเช็คว่า OPT น้อยที่สุด</div>
+</div>
+
+<h2>ส่วนที่ 1 · Deadlock</h2>
+<div class="quiz">
+  <div class="q" data-type="open"><div class="qt"><span class="qn">1.</span>จงอธิบายเงื่อนไขที่จำเป็นของการเกิด deadlock ทั้ง 4 ข้อ และอธิบายว่าทำไมเรียกว่า necessary แต่ไม่ใช่ sufficient condition (10 คะแนน)</div>
+    <div class="ans">Mutual exclusion (ทรัพยากรใช้ได้ทีละโปรเซส), Hold and wait (ถือแล้วรอเพิ่ม), No preemption (ยึดคืนไม่ได้), Circular wait (P0 รอ P1 … Pn รอ P0)
+    <br>เป็น necessary เพราะถ้าขาดข้อใดข้อหนึ่งจะไม่เกิด deadlock แน่นอน แต่ไม่ใช่ sufficient เพราะแม้ครบทั้ง 4 ข้อก็อาจไม่เกิด (เช่น RAG ที่มี cycle แต่ทรัพยากรหลาย instance ในรูป 2.4.D) การป้องกันจึงทำได้โดยทำลายเงื่อนไขใดเงื่อนไขหนึ่ง</div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">2.</span>กำหนด R1 = 1, R2 = 2, R3 = 1, R4 = 3 instances และ E = {P1→R1, P2→R3, R1→P2, R2→P2, R2→P1, R3→P3, P3→R2} จงเขียน allocation matrix, request matrix, Available และบอกว่าเกิด deadlock หรือไม่</div>
+    <div class="ans"><pre>Allocation   R1 R2 R3 R4      Request   R1 R2 R3 R4
+P1            0  1  0  0       P1        1  0  0  0
+P2            1  1  0  0       P2        0  0  1  0
+P3            0  0  1  0       P3        0  1  0  0
+Available = (0, 0, 0, 3)</pre>
+    ไม่มีโปรเซสไหนได้ตามที่ขอ (P1 ต้องการ R1, P2 ต้องการ R3, P3 ต้องการ R2 ซึ่งว่าง 0 หมด) → <b>deadlock P1, P2, P3</b> และมี cycle P1→R1→P2→R3→P3→R2→P1 กับ P2→R3→P3→R2→P2 (= รูป 2.4.C)</div></div>
+  <div class="q" data-type="text" data-answer="P2P4P5P1P3|24513"><div class="qt"><span class="qn">3.</span>Banker's (ชีทหน้า 58): Allocation P1 010, P2 200, P3 302, P4 211, P5 002 · Max P1 753, P2 322, P3 902, P4 222, P5 433 · Available 332 จงหา safe sequence (ไล่ P1 → P5 แบบชีท)</div>
+    <div class="ans">Need: P1 743, P2 122, P3 600, P4 011, P5 431 → Work 332 → P2 (532) → P4 (743) → P5 (745) → P1 (755) → P3 (10,5,7) → <b>&lt;P2, P4, P5, P1, P3&gt;</b></div></div>
+  <div class="q" data-type="mcq" data-answer="2"><div class="qt"><span class="qn">4.</span>ต่อจากข้อ 3 หลังจากให้ P2 ขอ (1,0,2) ไปแล้ว (Available = 2,3,0) ถ้า P1 ขอ (0,2,0) ผลคืออะไร</div><div class="opts">
+    <button class="opt">ให้ได้ เพราะ Request ≤ Available</button><button class="opt">ให้ไม่ได้ เพราะขอเกิน Need</button><button class="opt">ให้ไม่ได้ เพราะถ้าให้แล้วระบบจะ unsafe</button><button class="opt">ให้ได้ เพราะยังไม่เกิด deadlock</button></div>
+    <div class="fb">Available พอ (2,3,0) แต่สมมติให้แล้ว Available = (2,1,0) ไม่มีโปรเซสไหนมี Need ≤ (2,1,0) → unsafe → ให้รอ (ชีทหน้า 61)</div></div>
+</div>
+
+<h2>ส่วนที่ 2 · Memory Management</h2>
+<div class="quiz">
+  <div class="q" data-type="open"><div class="qt"><span class="qn">5.</span>logical address กับ physical address ต่างกันอย่างไร และ relocation register ทำหน้าที่อะไร</div>
+    <div class="ans">logical = address ที่ CPU/โปรแกรมสร้าง (มองจากโปรเซส) ส่วน physical = ตำแหน่งจริงในหน่วยความจำ relocation (base) register ใช้แปลง physical = base + logical (เช่น 14000 + 346 = 14346) และ limit register ใช้ตรวจว่า logical &lt; limit ไม่งั้นเกิด trap</div></div>
+  <div class="q" data-type="num" data-answer="26234"><div class="qt"><span class="qn">6.</span>base register = 25000, limit = 5000 แล้ว logical address 1234 = physical เท่าไร</div><div class="ans">1234 &lt; 5000 ✓ → 25000 + 1234 = <b>26234</b></div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">7.</span>hole ว่าง 100K, 500K, 200K, 300K, 600K โปรเซสเข้ามา 212K, 417K, 112K, 426K จงวางด้วย first-fit, best-fit, worst-fit และบอกข้อดีข้อเสียของแต่ละวิธี</div>
+    <div class="ans">First: 212→500, 417→600, 112→288 (เศษ), 426 รอ · Best: 212→300, 417→500, 112→200, 426→600 (ครบ) · Worst: 212→600, 417→500, 112→388 (เศษ), 426 รอ
+    <br>First เร็วแต่เกิดเศษช่วงต้น · Best เหลือเศษน้อยแต่ต้องค้นทุก hole และได้เศษเล็กมาก · Worst เศษใหญ่ใช้ต่อได้แต่ hole ใหญ่หมดเร็ว</div></div>
+  <div class="q" data-type="num" data-answer="9"><div class="qt"><span class="qn">8.</span>page size 4 byte, page table 0→5, 1→6, 2→1, 3→2 แล้ว logical address 13 = physical เท่าไร</div><div class="ans">p = 3, d = 1 → f = 2 → 2 × 4 + 1 = <b>9</b></div></div>
+  <div class="q" data-type="num" data-answer="140"><div class="qt"><span class="qn">9.</span>overlay two-pass assembler (Pass1 70K, Pass2 80K, symbol table 30K, common routine 20K, overlay driver 10K) ต้องใช้หน่วยความจำกี่ K</div><div class="ans">30 + 20 + 10 + max(70, 80) = <b>140K</b> (ถ้าไม่ใช้ overlay = 200K)</div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">10.</span>swapping คืออะไร เกี่ยวข้องกับ PCB อย่างไร</div>
+    <div class="ans">swap out โปรเซสออกไปเก็บที่ backing store (ดิสก์) แล้ว swap in อีกโปรเซสเข้ามาแทน (เช่น RR หมด quantum) ตอนสลับต้อง save PCB ของตัวเดิม (state, register, PC) และ load PCB ของตัวใหม่ = context switch</div></div>
+</div>
+
+<h2>ส่วนที่ 3 · Virtual Memory (เน้น)</h2>
+<p>ข้อ 12–16 ใช้ 3 frames กับ reference string <code>2 3 2 1 5 2 4 5 3 2 5 2 1 4 3 5 2 4 1 3</code> (การบ้าน)</p>
+<div class="quiz">
+  <div class="q" data-type="open"><div class="qt"><span class="qn">11.</span>จงอธิบายขั้นตอนการจัดการ page fault (6 ขั้น)</div>
+    <div class="ans">reference → trap (bit = i) → page is on backing store → bring in missing page (free frame) → reset page table (bit = v) → restart instruction โดย OS เป็นผู้จัดการ</div></div>
+  <div class="q" data-type="num" data-answer="17"><div class="qt"><span class="qn">12.</span>FIFO เกิด page fault กี่ครั้ง</div><div class="ans">17</div></div>
+  <div class="q" data-type="num" data-answer="10"><div class="qt"><span class="qn">13.</span>OPT เกิด page fault กี่ครั้ง</div><div class="ans">10</div></div>
+  <div class="q" data-type="num" data-answer="15"><div class="qt"><span class="qn">14.</span>LRU เกิด page fault กี่ครั้ง</div><div class="ans">15</div></div>
+  <div class="q" data-type="num" data-answer="12"><div class="qt"><span class="qn">15.</span>LFU เกิด page fault กี่ครั้ง</div><div class="ans">12</div></div>
+  <div class="q" data-type="num" data-answer="75"><div class="qt"><span class="qn">16.</span>page fault rate ของ LRU คือกี่ %</div><div class="ans">15/20 = <b>75%</b></div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">17.</span>Belady's anomaly คืออะไร เกิดกับอัลกอริทึมใด จงยกตัวอย่าง</div>
+    <div class="ans">เพิ่มจำนวนเฟรมแล้ว page fault กลับเพิ่มขึ้น เกิดกับ FIFO เช่น 1 2 3 4 1 2 5 1 2 3 4 5 ใช้ 3 เฟรม = 9 ครั้ง แต่ 4 เฟรม = 10 ครั้ง (LRU และ OPT ไม่เกิด เพราะเป็น stack algorithm)</div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">18.</span>เปรียบเทียบข้อดีข้อเสียของ FIFO, OPT และ LRU</div>
+    <div class="ans">FIFO: ง่าย overhead ต่ำ / อาจเอาเพจที่ใช้บ่อยออก และเกิด Belady · OPT: fault น้อยสุด / ใช้จริงไม่ได้เพราะต้องรู้อนาคต จึงใช้เป็นเกณฑ์ · LRU: ใกล้ OPT ไม่เกิด Belady / ต้องจดเวลาทุกครั้ง ต้องมีฮาร์ดแวร์ช่วย overhead สูง</div></div>
+</div>
+
+<h2>ส่วนที่ 4 · Secondary Storage</h2>
+<div class="quiz">
+  <div class="q" data-type="text" data-answer="110001010001"><div class="qt"><span class="qn">19.</span>ดิสก์ 12 บล็อก (0–11) บล็อกว่าง 2, 3, 4, 6, 8, 9, 10 จงเขียน bit vector ตามชีท</div><div class="ans"><b class="mono">110001010001</b></div></div>
+  <div class="q" data-type="num" data-answer="236"><div class="qt"><span class="qn">20.</span>head 53, คิว 98, 183, 37, 122, 14, 124, 65, 67 ใช้ SSTF total head movement เท่าไร</div><div class="ans">53→65→67→37→14→98→122→124→183 = 12+2+30+23+84+24+2+59 = <b>236</b></div></div>
+</div>
+
+<h2>ส่วนที่ 5 · File System &amp; Protection</h2>
+<div class="quiz">
+  <div class="q" data-type="open"><div class="qt"><span class="qn">21.</span>file property ที่ระบบเก็บไว้ใน directory มีอะไรบ้าง (อย่างน้อย 5 อย่าง)</div>
+    <div class="ans">file name (+ extension), file type, location (pointer ไปตำแหน่งบนดิสก์), size, current position, protection (สิทธิ์), time and date</div></div>
+  <div class="q" data-type="text" data-answer="rw-r-----"><div class="qt"><span class="qn">22.</span>สิทธิ์ 640 เขียนเป็นตัวอักษร rwx ได้อย่างไร</div><div class="ans"><b class="mono">rw-r-----</b> → owner อ่าน/เขียน, group อ่าน, others ไม่ได้อะไร</div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">23.</span>จงอธิบายนิยามของระบบที่ secure โดยใช้ state transition พร้อมวาดรูปประกอบ</div>
+    <div class="ans">มองระบบเป็น finite state machine แบ่ง state เป็น secure set กับ non-secure ระบบ secure เมื่อทุก transition (ทุก input/เหตุการณ์) จาก secure state พาไปได้แค่ secure state ถ้ามีช่องโหว่ (เช่น trojan หรือ backdoor) ที่ทำให้มี transition ไป non-secure ต้องปิด transition หรือเหตุการณ์ที่ trigger นั้น (patch)
+    <br>รูป: วงกลม S0, S1, S2 ในกรอบ secured set มีลูกศร a/b วนอยู่ภายใน และมีเส้นสีแดงหนึ่งเส้นออกไปที่ non-secure (ซึ่งต้องปิด)</div></div>
+  <div class="q" data-type="mcq" data-answer="0"><div class="qt"><span class="qn">24.</span>access list ต่างจาก access group อย่างไร</div><div class="opts">
+    <button class="opt">access list ระบุสิทธิ์รายคน ส่วน access group แบ่งเป็น owner/group/universe ทำให้จัดการง่ายกว่า</button>
+    <button class="opt">access list ใช้รหัสผ่าน ส่วน access group ไม่ใช้</button>
+    <button class="opt">access group ระบุสิทธิ์รายคน ส่วน access list แบ่งกลุ่ม</button>
+    <button class="opt">ไม่ต่างกัน</button></div>
+    <div class="fb">ถ้าจะให้ทุกคนอ่านได้ access list ต้องใส่ชื่อทุกคน ซึ่งยุ่งยาก access group จึงแบ่งผู้ใช้เป็น 3 กลุ่ม</div></div>
+</div>
+
+<h2>🎲 โจทย์สุ่ม (ฝึกได้ไม่จำกัด)</h2>
+<div data-widget="gen" data-kind="pr"></div>
+<div data-widget="gen" data-kind="banker"></div>
+<div data-widget="gen" data-kind="paging"></div>
+<div data-widget="gen" data-kind="disk"></div>
+
+<h2>แผนอ่าน</h2>
+<div class="grid2">
+  <div class="card"><b>มีเวลา 1 วัน</b><ol>
+    <li>Virtual Memory ทั้งบท + ฝึกโหมด "ฝึกเอง" ให้ครบ 5 อัลกอริทึม (3 ชม.)</li>
+    <li>Deadlock: เงื่อนไข, RAG, Banker's ตัวอย่างในชีท (2 ชม.)</li>
+    <li>Memory: logical/physical, fit, paging (1.5 ชม.)</li>
+    <li>File: property, rwx, secure FSM (1 ชม.)</li>
+    <li>ข้อสอบจำลองหน้านี้ (1 ชม.)</li></ol></div>
+  <div class="card"><b>มีเวลา 3 วัน</b><ol>
+    <li>วันที่ 1: Deadlock + Memory ทั้งบท ทำแบบฝึกในหน้าให้ครบ</li>
+    <li>วันที่ 2: Virtual Memory + Storage + โจทย์สุ่ม page replacement 10 ข้อ</li>
+    <li>วันที่ 3: File &amp; Protection + ข้อสอบจำลอง + ทวน checklist ในหน้าแรก</li></ol></div>
+</div>
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>

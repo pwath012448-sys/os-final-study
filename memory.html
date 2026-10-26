@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 Memory Management — ติว OS Final</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+<aside class="toc"></aside>
+<main>
+<h1>บทที่ 2 · Memory Management <span class="tag hot">ออก</span></h1>
+<p class="lead">ชีท <b>memory_mng(3_1)</b> หน้า 70–81 (12 หน้า) — อาจารย์เปิดในคลิปนาที 6:10–17:00</p>
+<div class="box idea"><span class="t">💡 ภาพรวมของบทนี้ในประโยคเดียว</span>
+หลายโปรเซสต้อง<b>แชร์หน่วยความจำ (RAM) ก้อนเดียวกัน</b> OS ต้องตอบ 3 คำถาม:
+<b>(1)</b> โปรแกรมอ้าง address แบบไหน แล้วแปลงเป็นตำแหน่งจริงอย่างไร
+<b>(2)</b> จะวางโปรเซสไว้ตรงไหน
+<b>(3)</b> พอมีช่องว่างกระจัดกระจาย (hole) จะแก้อย่างไร — คำตอบสุดท้ายของบทนี้คือ <b>paging</b></div>
+
+<h2>2.1 Address binding</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span>ตอนเปิดหน้านี้อาจารย์บอกว่า <q>อันนี้จะไม่เน้น</q> แล้วไปพูดเรื่อง dynamic linking กับ static linking <button class="ts" data-ts="350"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="mem" data-page="1" data-img="mem-p01.jpg" data-fig="รูปที่ 3.1.A ขั้นตอนของโปรแกรมผู้ใช้"></figure>
+  <figure class="slide" data-src="mem" data-page="2" data-img="mem-p02.jpg" data-fig="3.1.1–3.1.5" data-t="372"></figure>
+</div>
+<p>โปรแกรมเขียนด้วยชื่อ (<b>symbolic address</b> เช่น ตัวแปร A, B) แต่ตอนรันต้องใช้ <b>physical address</b> การแปลงนี้เรียกว่า <b>address binding</b> ทำได้ 3 จังหวะ:</p>
+<table class="t left">
+  <tr><th>จังหวะ</th><th>ได้ address แบบ</th><th>ผล</th></tr>
+  <tr><td><b>Compile time</b></td><td><b>absolute address</b> (fixed)</td><td>ต้องลงตำแหน่งเดิมทุกครั้ง ย้ายไม่ได้</td></tr>
+  <tr><td><b>Load time</b></td><td><b>relocatable address</b> (not fixed)</td><td>OS เลือกที่ว่างตอนโหลด แต่โหลดแล้วย้ายไม่ได้</td></tr>
+  <tr><td><b>Execution time</b> (run time)</td><td>เปลี่ยนได้ขณะรัน</td><td>ย้ายโปรเซสไปเซกเมนต์อื่นได้ ต้องมีฮาร์ดแวร์ช่วย เช่น <b>base register</b></td></tr>
+</table>
+
+<h2>2.2 Logical address vs physical address ★</h2>
+<div class="box goal"><span class="t">🎯 ต้องทำได้</span>บอกความต่างได้ และคำนวณ physical address จาก base / limit register ได้</div>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>สิ่งที่ควรรู้คือสองคำนี้ต้องรู้ logical address กับ physical address ต่างกันอย่างไร อันหนึ่งเป็นเลขที่ CPU อ้างถึง … สมมติ 346 เขาต้องมี relocation register คือ transform ไปเป็นตำแหน่งจริงใน memory</q> <button class="ts" data-ts="529"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="mem" data-page="4" data-img="mem-p04.jpg" data-fig="รูปที่ 3.1.E relocation register (346 → 14346)" data-t="532"></figure>
+  <figure class="slide" data-src="mem" data-page="7" data-img="mem-p07.jpg" data-fig="รูปที่ 3.1.H base and limit register" data-t="676"></figure>
+</div>
+<div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: เลขห้องในหอพัก</span>
+โปรแกรมคิดว่าตัวเองอยู่ "ห้อง 346" (นับจากห้องแรกของตัวเอง = <b>logical</b>) แต่จริงๆ ห้องแรกของมันอยู่ที่ตึกเลข 14000 ห้องจริงจึงเป็น 14000 + 346 = <b>14346</b> (= <b>physical</b>)
+<br>ส่วน limit คือ "เช่าไว้กี่ห้อง" ถ้าขอห้องเกินจำนวนที่เช่า → โดนไล่ (trap)</div>
+<ul>
+  <li><b>Logical address</b> = เลขที่ CPU/โปรแกรมอ้าง (มองจากมุมโปรเซส เริ่มที่ 0)</li>
+  <li><b>Physical address</b> = ตำแหน่งจริงในหน่วยความจำ = <b>base (relocation register) + logical</b></li>
+  <li><b>Protection (รูป 3.1.H):</b> ตรวจก่อนว่า <b>logical &lt; limit</b> ถ้าใช่จึงบวก base ถ้าไม่ใช่จะเกิด <b>trap: addressing error</b></li>
+</ul>
+<div data-widget="reloc"></div>
+<div class="box exam"><span class="t">📝 เขียนตอบแบบนี้</span><pre>Logical address คือ address ที่ CPU/โปรแกรมสร้างขึ้น (มองจากมุมโปรเซส)
+Physical address คือตำแหน่งจริงในหน่วยความจำ
+MMU แปลงโดย physical = relocation(base) register + logical
+เช่น base = 14000, logical = 346 → physical = 14346
+และต้องตรวจ logical < limit ก่อน ไม่งั้นเกิด trap (addressing error)</pre></div>
+
+<h2>2.3 Dynamic loading / dynamic linking / static linking</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span>"Dynamic linking and static linking" <button class="ts" data-ts="361"></button></div>
+<ul>
+  <li><b>Dynamic loading</b> (ชีท 3.1.2): โหลดเข้าหน่วยความจำเป็นส่วนๆ เช่น โหลด main program ก่อน แล้วค่อยโหลด subroutine <b>ตอนที่ถูกเรียก</b> จึงประหยัดหน่วยความจำ</li>
+  <li><b>Dynamic linking</b> (ชีท 3.1.3 เขียนว่า): ถ้าโปรแกรมเรียก subroutine ระบบจะนำ subroutine มาลิงก์เข้ากับตัวโปรแกรม ทำให้โปรแกรมใหญ่ขึ้น</li>
+</ul>
+<div class="box trap"><span class="t">⚠️ ระวัง: นิยามในชีทกับในตำราไม่ตรงกัน</span>
+ตำรา (Silberschatz):
+<br>• <b>Static linking</b> = รวม library เข้าไปในไฟล์โปรแกรมเลยตอน link → ไฟล์ใหญ่ และทุกโปรแกรมมีสำเนาของตัวเอง
+<br>• <b>Dynamic linking</b> = เลื่อนการลิงก์ไปทำ<b>ตอนรัน</b> (ใช้ stub ชี้ไปที่ shared library) → ไฟล์เล็ก และหลายโปรแกรมใช้ library ชุดเดียวกันได้
+<br>ข้อความในชีท 3.1.3 ตรงกับ static linking ตอนสอบให้<b>อธิบายเทียบทั้งสองแบบ</b> จะปลอดภัยที่สุด</div>
+
+<h2>2.4 Overlay และ Swapping ★</h2>
+<div class="slides">
+  <figure class="slide" data-src="mem" data-page="3" data-img="mem-p03.jpg" data-fig="รูปที่ 3.1.B overlay, 3.1.C swapping" data-t="402"></figure>
+</div>
+<h3>Overlay (รูป 3.1.B two-pass assembler)</h3>
+<p>สมัยก่อนถ้าโปรแกรมใหญ่กว่าหน่วยความจำ ต้องแบ่งเป็นส่วนแล้วผลัดกันใช้พื้นที่ ส่วนที่ใช้ตลอดคือ symbol table 30K + common routine 20K + overlay driver 10K ส่วน Pass1 (70K) กับ Pass2 (80K) <b>ผลัดกันใช้ที่เดียวกัน</b></p>
+<pre>ไม่ใช้ overlay = 70 + 80 + 30 + 20       = 200K
+ใช้ overlay    = 30 + 20 + 10 + max(70,80) = 140K</pre>
+<h3>Swapping ★</h3>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>สมมติว่ามันมีขนาด block memory ตรงนี้เหลืออยู่ 80 kilobytes … process สองอันยัดเข้าไปพร้อมกันไม่ได้ ก็ต้องมีการสลับเข้าสลับออก … save process control block, load process control block ก็จะถามนิดหน่อย</q> <button class="ts" data-ts="411"></button></div>
+<ul>
+  <li><b>Swap out</b>: เอาโปรเซสที่กำลังทำงานออกจากหน่วยความจำชั่วคราวไปเก็บที่ <b>backing store (ดิสก์)</b></li>
+  <li><b>Swap in</b>: นำอีกโปรเซสเข้ามาให้ CPU ทำแทน (เช่น RR CPU scheduling เมื่อหมด quantum)</li>
+  <li>ตอนสลับโปรเซสต้อง <b>save PCB</b> (สถานะ, register, program counter ฯลฯ) ของตัวเดิม แล้ว <b>load PCB</b> ของตัวใหม่ ซึ่งก็คือ <b>context switch</b></li>
+</ul>
+
+<h2>2.5 Single partition: low memory / high memory ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>คำว่า low และ high address บางทีมันจะเขียน low อยู่ข้างเลข … เราต้องดูเลขนะ บางทีเลขส่วนอยู่ข้างล่าง … low memory OS จะอยู่ที่เลข 0 … หรือบางทีเขาออกแบบมาเป็นแบบให้พื้นที่ว่างตรงกลางก็ได้ ก็จะเกี่ยวข้องกับเรื่อง stack กับ heap</q> <button class="ts" data-ts="461"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="mem" data-page="4" data-img="mem-p04.jpg" data-fig="รูปที่ 3.1.D low memory / high memory" data-t="464"></figure>
+</div>
+<ul>
+  <li><b>Low memory</b>: OS อยู่ที่ address 0 แล้ว user ต่อจาก OS ทันที ส่วนที่ว่างอยู่ท้าย</li>
+  <li><b>High memory</b>: OS อยู่ที่ 0 แต่ user ไปอยู่ <b>ท้าย</b> (address สูง ใกล้ 512K) ที่ว่างอยู่ตรงกลาง</li>
+  <li>บางระบบเว้นที่ว่างไว้ตรงกลาง เพื่อให้ <b>stack</b> โตลงและ <b>heap</b> โตขึ้นเข้าหากัน</li>
+</ul>
+<div class="box trap"><span class="t">⚠️ อาจารย์เตือน</span>อย่าดูจากตำแหน่งบน/ล่างของรูป <b>ให้ดูเลข address</b> เพราะบางรูปเขียน 0 ไว้ด้านล่าง</div>
+
+<h2>2.6 Multiple partition + RR (ตัวอย่าง 3.1.ก)</h2>
+<div class="slides">
+  <figure class="slide" data-src="mem" data-page="5" data-img="mem-p05.jpg" data-fig="ตัวอย่างที่ 3.1.ก รูป 3.1.F" data-t="560"></figure>
+  <figure class="slide" data-src="mem" data-page="6" data-img="mem-p06.jpg" data-fig="รูปที่ 3.1.G + 3.1.8 placement strategy" data-t="580"></figure>
+</div>
+<p>โจทย์: หน่วยความจำ 2560K ใช้กับ OS 400K (เหลือ 2160K), low memory, RR quantum = 1 ms และ ready queue เป็น FCFS ให้ลองเลื่อนดูเหตุการณ์ทีละขั้น:</p>
+<div data-widget="rrmem"></div>
+<div class="box exam"><span class="t">📝 วิธีคิดเวลาจบของ RR (q = 1)</span>ตอนแรกมี P1, P2, P3 สลับกันทีละ 1 ms: เวลา 0 = P1, 1 = P2, 2 = P3, 3 = P1, … P2 ต้องการ 5 ms จึงได้รันที่ 1, 4, 7, 10, 13 → <b>จบที่ 14</b> แล้ว P4 ได้เข้าแทนที่ (1000–1700K) ทำแบบเดียวกันต่อไป จะได้ P1 จบ 28 → P5 เข้า (400–900K), P4 จบ 38, P3 จบ 53, P5 จบ 58</div>
+
+<h2>2.7 Placement strategy: first / best / worst fit ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>first fit … มีข้อดีข้อเสียยังไง ไปทบทวนครับ สามอย่างเนี่ย</q> <button class="ts" data-ts="643"></button></div>
+<ul>
+  <li><b>First-fit</b>: วางใน hole <b>แรก</b>ที่ใส่ได้ (ค้นจากต้นทุกครั้ง หรือค้นต่อจากที่วางล่าสุดก็ได้)</li>
+  <li><b>Best-fit</b>: วางใน hole ที่<b>เล็กที่สุด</b>ที่ใส่ได้ → ต้องค้นทุก hole ยกเว้นมี list เรียงจากเล็กไปใหญ่</li>
+  <li><b>Worst-fit</b>: วางใน hole ที่<b>ใหญ่ที่สุด</b> → ต้องค้นทุก hole ยกเว้นมี list เรียงจากใหญ่ไปเล็ก</li>
+</ul>
+<div data-widget="fit"></div>
+<table class="t left">
+  <tr><th>วิธี</th><th>ข้อดี</th><th>ข้อเสีย</th></tr>
+  <tr><td>First-fit</td><td>เร็วที่สุด หยุดค้นเมื่อเจอ hole แรกที่พอ</td><td>เศษเล็กๆ กองอยู่ช่วงต้นหน่วยความจำ</td></tr>
+  <tr><td>Best-fit</td><td>เหลือเศษน้อยสุด เก็บ hole ใหญ่ไว้ให้โปรเซสใหญ่</td><td>ต้องค้นทุก hole และได้เศษเล็กมากที่ใช้ต่อไม่ได้</td></tr>
+  <tr><td>Worst-fit</td><td>เศษที่เหลือใหญ่ ยังพอใช้ต่อได้</td><td>ต้องค้นทุก hole, hole ใหญ่หมดเร็ว โปรเซสใหญ่ที่มาทีหลังอาจไม่มีที่ลง</td></tr>
+</table>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt"><span class="qn">Q1</span>hole = 100, 500, 200, 300, 600 และโปรเซส 212, 417, 112, 426 วิธีใดวางได้ครบทุกโปรเซส</div><div class="opts">
+    <button class="opt">First-fit</button><button class="opt">Best-fit</button><button class="opt">Worst-fit</button><button class="opt">ไม่มีวิธีไหนวางครบ</button></div>
+    <div class="fb">Best-fit: 212→300, 417→500, 112→200, 426→600 ครบทุกตัว ส่วน first-fit กับ worst-fit ทำให้ 426K ต้องรอ (ลองกดในเครื่องมือด้านบนดูได้)</div></div>
+</div>
+
+<h2>2.8 Fragmentation และ compaction ★</h2>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>การแก้ปัญหาว่าบับโบล (bubble) หรือ fragment ใน memory จะแก้ยังไง วิธีแรกคือการเลื่อนให้มันมีพื้นที่ใหญ่กองรวมกัน ซึ่งมันก็จะกินเวลา … big O ของ N คูณกับ K เวลาที่ใช้ในการ copy … มันก็เลยต้องมีการแบ่งเป็น page</q> <button class="ts" data-ts="745"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="mem" data-page="7" data-img="mem-p07.jpg" data-fig="รูปที่ 3.1.I compaction (เหลือ 660K)" data-t="748"></figure>
+  <figure class="slide" data-src="mem" data-page="8" data-img="mem-p08.jpg" data-fig="รูปที่ 3.1.J compaction หลายแบบ" data-t="800"></figure>
+</div>
+<ul>
+  <li>โปรเซสเข้าออกหลายครั้งจะเกิด <b>hole</b> กระจัดกระจาย ที่ว่างรวมกันพอ แต่ไม่ติดกันจึงใช้ไม่ได้ = <b>external fragmentation</b></li>
+  <li><b>Compaction</b> = ย้ายโปรเซสให้ชิดกัน เพื่อรวมที่ว่างเป็นก้อนเดียว เช่น รูป 3.1.I ได้ 100 + 300 + 260 = <b>660K</b></li>
+  <li>รูป 3.1.J: วิธีที่ย้ายน้อยที่สุดคือ <b>ย้าย 200K</b> (ย้ายแค่ P3 ไปต่อท้าย P4) ส่วนแบบอื่นย้าย 600K หรือ 400K</li>
+  <li>ข้อเสีย: <b>ช้า</b> เพราะต้อง copy ข้อมูลทั้งหมดที่ย้าย ทางแก้ที่ดีกว่าคือ <b>paging</b></li>
+</ul>
+<div class="grid2">
+  <div class="card"><b>Contiguous allocation</b><br>✅ ง่าย แปลง address แค่บวก base<br>❌ เกิด external fragmentation รันได้ไม่กี่โปรเซส และต้อง swap หรือ compaction</div>
+  <div class="card"><b>Paging</b><br>✅ ลงเฟรมไหนก็ได้ ไม่ต้องติดกัน จึงไม่มี external fragmentation<br>❌ มี internal fragmentation (เพจสุดท้ายใช้ไม่เต็ม) และต้องมี page table</div>
+</div>
+
+<h2>2.9 Paging ★</h2>
+<div class="box goal"><span class="t">🎯 ต้องทำได้</span>แปลง logical → physical ได้ทั้งเลขฐาน 10 และระดับบิต และบอกได้ว่า page / frame / offset คืออะไร</div>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>address ใน logical ถ้าเป็นเรื่อง page จะใช้คำว่า page … frame คือ physical frame ที่ขนาดเท่ากับ page … frame มันจะบอกตำแหน่งเริ่มต้น แล้วก็ CPU อยากอ่านตำแหน่งไหน สมมติว่า page ละ 1K … 0 ถึง 1023</q> <button class="ts" data-ts="724"></button> <button class="ts" data-ts="964"></button></div>
+<div class="slides">
+  <figure class="slide" data-src="mem" data-page="8" data-img="mem-p08.jpg" data-fig="3.1.10 Paging (นิยาม)" data-t="848"></figure>
+  <figure class="slide" data-src="mem" data-page="9" data-img="mem-p09.jpg" data-fig="รูปที่ 3.1.K, 3.1.L" data-t="892"></figure>
+  <figure class="slide" data-src="mem" data-page="10" data-img="mem-p10.jpg" data-fig="รูปที่ 3.1.M 32-word memory, 4-word pages" data-t="1014"></figure>
+  <figure class="slide" data-src="mem" data-page="11" data-img="mem-p11.jpg" data-fig="คำอธิบาย 3.1.M และ 3.1.N"></figure>
+  <figure class="slide" data-src="mem" data-page="12" data-img="mem-p12.jpg" data-fig="รูปที่ 3.1.N แปลงระดับบิต (1502 → 6622)"></figure>
+</div>
+<div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: หนังสือ 1 เล่มแยกเป็นแผ่น</span>
+logical memory ของโปรแกรมถูกตัดเป็นแผ่นเท่าๆ กัน (<b>page</b>) แล้วนำไปวางในช่องว่างของ RAM ที่ขนาดเท่ากัน (<b>frame</b>) จะวางช่องไหนก็ได้ ไม่ต้องติดกัน
+<br><b>Page table</b> คือสมุดจดว่า "แผ่นที่ p อยู่ช่องที่ f" ส่วน <b>offset d</b> คือ "บรรทัดที่เท่าไรในแผ่นนั้น" ซึ่งเท่าเดิมทั้งใน page และ frame</div>
+<pre>logical address  = (p, d)      p = page number, d = page offset
+physical address = (f, d)      f = page_table[p], d เท่าเดิม
+
+p = logical div page_size
+d = logical mod page_size
+physical = f × page_size + d</pre>
+<h3>ตัวอย่างในชีท (รูป 3.1.M) ทำทีละขั้น</h3>
+<p>memory 32 byte, page = 4 byte, page table = [0→5, 1→6, 2→1, 3→2]</p>
+<pre>logical 0  (A): p = 0, d = 0 → f = 5 → 5×4 + 0 = 20
+logical 5  (F): p = 1, d = 1 → f = 6 → 6×4 + 1 = 25   ← ชีทคำนวณข้อนี้
+logical 13 (N): p = 3, d = 1 → f = 2 → 2×4 + 1 = 9</pre>
+<h3>ระดับบิต (รูป 3.1.N)</h3>
+<p>address 16 บิต, page = 1 KB = 2<sup>10</sup> → <b>d = 10 บิต</b>, <b>p = 6 บิต</b> (มี 64 เพจ / 64 เฟรม)</p>
+<pre>logical 1502 = 000001 0111011110  → p = 1, d = 478
+page_table[1] = 000110 = 6
+physical     = 000110 0111011110  = 6×1024 + 478 = 6622</pre>
+<div data-widget="paging" data-preset="0"></div>
+<div class="box trap"><span class="t">⚠️ จุดที่มักพลาด</span>• เอา p ไปคูณ page size แทน f (ต้องใช้ <b>f</b> ที่ได้จาก page table)<br>• ลืมว่า d ไม่เปลี่ยน<br>• นับเพจเริ่มที่ 1 (ต้องเริ่มที่ <b>0</b>)</div>
+<div class="quiz">
+  <div class="q" data-type="num" data-answer="6"><div class="qt"><span class="qn">Q2</span>page table เดียวกับรูป 3.1.M (0→5, 1→6, 2→1, 3→2) logical address 10 ได้ physical address เท่าไร</div>
+    <div class="ans">p = 10 div 4 = 2, d = 10 mod 4 = 2 → f = 1 → 1×4 + 2 = <b>6</b> (ตัวอักษร K อยู่ที่ตำแหน่งจริง 6 ตรงกับรูป)</div></div>
+  <div class="q" data-type="num" data-answer="26552"><div class="qt"><span class="qn">Q3</span>16 บิต, page 1 KB, page table ช่องที่ 2 = 011001₂ แล้ว logical address 3000 = physical เท่าไร</div>
+    <div class="ans">3000 = 2×1024 + 952 → p = 2, d = 952 → f = 011001₂ = 25 → 25×1024 + 952 = <b>26552</b></div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">Q4</span>ทำไม paging ถึงแก้ปัญหา external fragmentation ได้</div>
+    <div class="ans">เพราะแบ่งทั้ง logical memory และ physical memory เป็นชิ้นขนาดเท่ากัน (page = frame) เพจลงเฟรมว่างไหนก็ได้ <b>ไม่ต้องติดกัน</b> ขอแค่มีเฟรมว่างพอ จึงไม่ต้องหา hole ใหญ่ติดกันและไม่ต้อง compaction แต่จะยังมี internal fragmentation ในเพจสุดท้าย</div></div>
+</div>
+<p>ฝึกเพิ่มด้วยโจทย์สุ่ม:</p>
+<div data-widget="gen" data-kind="paging"></div>
+
+<h2>2.10 เสริมจากสไลด์อังกฤษ ch8 (อาจารย์ไม่ได้เปิดในคลิป)</h2>
+<p class="muted">อยู่ในแผนการสอนสัปดาห์ที่ 10 (Paging, Segmentation) ให้อ่านหลังจากเข้าใจส่วนบนแล้ว</p>
+<div class="slides">
+  <figure class="slide" data-src="ch8" data-page="21" data-img="ch8-p21.jpg" data-fig="Address Translation Scheme"></figure>
+  <figure class="slide" data-src="ch8" data-page="28" data-img="ch8-p28.jpg" data-fig="Paging Hardware With TLB"></figure>
+  <figure class="slide" data-src="ch8" data-page="29" data-img="ch8-p29.jpg" data-fig="Effective Access Time"></figure>
+  <figure class="slide" data-src="ch8" data-page="47" data-img="ch8-p47.jpg" data-fig="Segmentation Architecture"></figure>
+  <figure class="slide" data-src="ch8" data-page="50" data-img="ch8-p50.jpg" data-fig="Example of Segmentation"></figure>
+</div>
+<ul>
+  <li><b>TLB</b> = cache ของ page table (associative memory) ถ้าไม่มี TLB การอ่านข้อมูล 1 ครั้งต้องเข้าหน่วยความจำ 2 รอบ
+  <br>EAT = hit × (TLB + mem) + miss × (TLB + 2 × mem) เช่น TLB 20 ns, mem 100 ns, hit 80% → 0.8 × 120 + 0.2 × 220 = <b>140 ns</b></li>
+  <li><b>Segmentation</b> = แบ่งตามมุมมองของโปรแกรม (main, function, stack, …) address = &lt;s, d&gt; ถ้า d &lt; limit จะได้ physical = base + d ถ้าไม่ใช่เกิด trap
+  <br>เช่น ตารางในสไลด์ segment 2 (limit 400, base 4300): (2, 53) → <b>4353</b></li>
+</ul>
+<div class="quiz">
+  <div class="q" data-type="num" data-answer="122"><div class="qt"><span class="qn">Q5</span>TLB = 20 ns, memory = 100 ns, hit ratio = 98% หา EAT (ns)</div>
+    <div class="ans">0.98 × (20 + 100) + 0.02 × (20 + 200) = 117.6 + 4.4 = <b>122 ns</b></div></div>
+</div>
+
+<div class="nextprev"><a href="deadlock.html">← บทที่ 1 Deadlock</a><a class="r" href="vm.html">บทที่ 3 Virtual Memory ★ →</a></div>
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>
