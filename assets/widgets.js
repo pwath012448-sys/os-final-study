@@ -324,10 +324,18 @@
     { label: "รูป 2.4.B (ไม่มี cycle)", inst: [1,2,1,3], alloc: [[0,1,0,0],[1,1,0,0],[0,0,1,0]], req: [[1,0,0,0],[0,0,1,0],[0,0,0,0]] },
     { label: "รูป 2.4.C (มี cycle + deadlock)", inst: [1,2,1,3], alloc: [[0,1,0,0],[1,1,0,0],[0,0,1,0]], req: [[1,0,0,0],[0,0,1,0],[0,1,0,0]] },
     { label: "รูป 2.4.D (มี cycle แต่ไม่ deadlock)", inst: [2,2], alloc: [[0,1],[1,0],[1,0],[0,1]], req: [[1,0],[0,0],[0,1],[0,0]] },
+    { label: "ชีวิตจริง: การบ้าน ห้องแล็บ 3 คน 3 อุปกรณ์", pn: ["นักศึกษา 1", "นักศึกษา 2", "นักศึกษา 3"], rn: ["Printer", "Projector", "Notebook"],
+      inst: [1,1,1], alloc: [[1,0,0],[0,1,0],[0,0,1]], req: [[0,1,0],[0,0,1],[1,0,0]] },
+    { label: "ชีวิตจริง: ห้องแล็บ แต่มี Projector 2 เครื่อง", pn: ["นักศึกษา 1", "นักศึกษา 2", "นักศึกษา 3"], rn: ["Printer", "Projector", "Notebook"],
+      inst: [1,2,1], alloc: [[1,0,0],[0,1,0],[0,0,1]], req: [[0,1,0],[0,0,1],[1,0,0]] },
+    { label: "ชีวิตจริง: กินข้าว ช้อนกับส้อม (2 คน)", pn: ["คน A", "คน B"], rn: ["ช้อน", "ส้อม"],
+      inst: [1,1], alloc: [[1,0],[0,1]], req: [[0,1],[1,0]] },
+    { label: "ชีวิตจริง: สี่แยก รถ 4 คัน (รูป 2.4.A)", pn: ["รถ 1", "รถ 2", "รถ 3", "รถ 4"], rn: ["ช่อง 1", "ช่อง 2", "ช่อง 3", "ช่อง 4"],
+      inst: [1,1,1,1], alloc: [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], req: [[0,1,0,0],[0,0,1,0],[0,0,0,1],[1,0,0,0]] },
   ];
   W.rag = function (host) {
     const st = JSON.parse(JSON.stringify(RAG_PRESETS[+(host.dataset.preset || 0)]));
-    const body = frame(host, "Resource-Allocation Graph ↔ Allocation / Request matrix", presetSelect(RAG_PRESETS, p => { Object.assign(st, JSON.parse(JSON.stringify(p))); build(); }));
+    const body = frame(host, "Resource-Allocation Graph ↔ Allocation / Request matrix", presetSelect(RAG_PRESETS, p => { delete st.pn; delete st.rn; Object.assign(st, JSON.parse(JSON.stringify(p))); build(); }));
     const grid = el("div", { class: "grid3" }), pic = el("div"), out = el("div", { class: "explain" });
     body.append(el("p", { class: "muted" }, "แก้ตัวเลขในตารางได้ แล้วกราฟจะวาดใหม่ทันที: ลูกศร P → R = ขอ (request) และลูกศร R → P = ได้ไปแล้ว (allocation) จุดในกล่อง R คือจำนวน instance"), grid, pic, out);
     function mtx(title, M, cols) {
@@ -347,7 +355,7 @@
       draw();
     }
     function draw() {
-      const n = st.alloc.length, m = st.inst.length, Wd = Math.max(420, Math.max(n, m) * 130), Ht = 300;
+      const n = st.alloc.length, m = st.inst.length, Wd = Math.max(420, Math.max(n, m) * 130), Ht = st.rn ? 330 : 300;
       const px = i => (i + 0.5) * Wd / n, rx = j => (j + 0.5) * Wd / m, py = 60, ry = 220;
       const used = st.inst.map((_, j) => st.alloc.reduce((s, r) => s + r[j], 0));
       const avail = st.inst.map((v, j) => v - used[j]);
@@ -356,7 +364,7 @@
       const dead = new Set(det.deadlocked.map(i => "P" + i));
       const hot = new Set();
       if (det.deadlocked.length) cycles.forEach(c => { if (c.some(x => dead.has(x))) for (let k = 0; k + 1 < c.length; k++) hot.add(c[k] + ">" + c[k + 1]); });
-      const g = svg("svg", { viewBox: `0 0 ${Wd} ${Ht}`, width: "100%", style: `max-width:${Wd}px` });
+      const g = svg("svg", { viewBox: `0 ${st.pn ? -20 : 0} ${Wd} ${Ht + (st.pn ? 20 : 0)}`, width: "100%", style: `max-width:${Wd}px` });
       g.append(svg("defs", null, ["#555", "#3157d5", "#c43d3d"].map((c, k) => svg("marker", { id: "ah" + k + host.dataset.uid, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, svg("path", { d: "M0,0 L10,5 L0,10 z", fill: c })))));
       const line = (x1, y1, x2, y2, color, k, dash) => {
         const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
@@ -364,17 +372,20 @@
       };
       st.alloc.forEach((row, i) => row.forEach((v, j) => { if (v > 0) { const h = hot.has("R" + j + ">P" + i); g.append(line(rx(j) - 8, ry, px(i) + 8, py, h ? "#c43d3d" : "#555", h ? 2 : 0)); if (v > 1) g.append(svg("text", { x: (rx(j) + px(i)) / 2 - 18, y: (ry + py) / 2, "font-size": 12 }, "×" + v)); } }));
       st.req.forEach((row, i) => row.forEach((v, j) => { if (v > 0) { const h = hot.has("P" + i + ">R" + j); g.append(line(px(i) - 8, py, rx(j) + 8, ry, h ? "#c43d3d" : "#3157d5", h ? 2 : 1, "6 4")); if (v > 1) g.append(svg("text", { x: (rx(j) + px(i)) / 2 + 6, y: (ry + py) / 2, "font-size": 12, fill: "#3157d5" }, "×" + v)); } }));
-      for (let i = 0; i < n; i++) g.append(svg("circle", { cx: px(i), cy: py, r: 26, fill: dead.has("P" + i) ? "#fbe7e7" : "#e8eaee", stroke: dead.has("P" + i) ? "#c43d3d" : "#666", "stroke-width": 1.5 }), svg("text", { x: px(i), y: py + 5, "text-anchor": "middle", "font-size": 15 }, "P" + (i + 1)));
+      for (let i = 0; i < n; i++) g.append(svg("circle", { cx: px(i), cy: py, r: 26, fill: dead.has("P" + i) ? "#fbe7e7" : "#e8eaee", stroke: dead.has("P" + i) ? "#c43d3d" : "#666", "stroke-width": 1.5 }), svg("text", { x: px(i), y: py + 5, "text-anchor": "middle", "font-size": 15 }, "P" + (i + 1)),
+        st.pn && st.pn[i] ? svg("text", { x: px(i), y: py - 34, "text-anchor": "middle", "font-size": 12, fill: "#555" }, st.pn[i]) : svg("g"));
       for (let j = 0; j < m; j++) {
         const k = st.inst[j], h = Math.max(36, 14 * k + 10);
         g.append(svg("rect", { x: rx(j) - 22, y: ry - h / 2, width: 44, height: h, fill: "#fff", stroke: "#444", "stroke-width": 1.5 }));
         for (let q = 0; q < k; q++) g.append(svg("circle", { cx: rx(j), cy: ry - h / 2 + 12 + q * 14, r: 4, fill: q < used[j] ? "#555" : "#fff", stroke: "#555" }));
         g.append(svg("text", { x: rx(j), y: ry + h / 2 + 18, "text-anchor": "middle", "font-size": 14 }, "R" + (j + 1)));
+        if (st.rn && st.rn[j]) g.append(svg("text", { x: rx(j), y: ry + h / 2 + 34, "text-anchor": "middle", "font-size": 12, fill: "#555" }, st.rn[j]));
       }
       pic.innerHTML = ""; pic.append(g, el("div", { class: "legend" }, el("span", null, "── R → P ได้ไปแล้ว"), el("span", { style: "color:#3157d5" }, "- - P → R ขอ"), el("span", null, "● = instance ที่ถูกใช้, ○ = ว่าง")));
       const name = s => s.replace(/P(\d+)/g, (_, k) => "P" + (+k + 1)).replace(/R(\d+)/g, (_, k) => "R" + (+k + 1));
       const multi = st.inst.some(v => v > 1);
-      out.innerHTML = `<b>Available</b> = ${vec(avail)}<br>` +
+      const who = (st.pn ? st.pn.map((x, i) => `P${i + 1} = ${x}`) : []).concat(st.rn ? st.rn.map((x, j) => `R${j + 1} = ${x}`) : []);
+      out.innerHTML = (who.length ? `<span class="muted">${who.join(" · ")}</span><br>` : "") + `<b>Available</b> = ${vec(avail)}<br>` +
         (cycles.length ? `<b>Cycle ที่พบ (${cycles.length})</b>: ${cycles.map(c => name(c.join(" → "))).join("<br>")}` : "<b>ไม่มี cycle</b> → ไม่เกิด deadlock แน่นอน") + "<br>" +
         (det.deadlocked.length ? `<span class="big no">Deadlock ✗</span> โปรเซสที่ติด: ${det.deadlocked.map(i => "P" + (i + 1)).join(", ")} (ไล่ detection แล้วไม่มีใครได้ตามที่ขอ)` :
           `<span class="big ok">ไม่เกิด deadlock ✓</span> ไล่ได้ครบ: &lt;${det.seq.map(i => "P" + (i + 1)).join(", ")}&gt;` + (cycles.length ? `<br><span class="muted">มี cycle แต่ไม่ deadlock เพราะทรัพยากรมีหลาย instance และมีโปรเซสนอก cycle ที่คืนทรัพยากรได้ (cycle = เงื่อนไขจำเป็น ไม่ใช่เงื่อนไขพอเพียง)</span>` : "")) +

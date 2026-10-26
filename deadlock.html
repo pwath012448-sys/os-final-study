@@ -123,7 +123,99 @@ P3     0  0  0  0</pre></div>
     <div class="ans">เพราะ R1 กับ R2 มีอย่างละ <b>2 instances</b> และมีโปรเซสนอก cycle คือ P2 (ถือ R1) กับ P4 (ถือ R2) ที่ไม่ได้รออะไร เมื่อ P4 ทำงานจบแล้วคืน R2 → P3 ได้ R2 / เมื่อ P2 จบแล้วคืน R1 → P1 ได้ R1 → ทุกตัวจบได้ cycle จึงเป็นแค่<b>เงื่อนไขจำเป็น ไม่ใช่เงื่อนไขพอเพียง</b> เมื่อทรัพยากรมีหลาย instance</div></div>
 </div>
 
-<h2>1.4 วิธีจัดการ deadlock: prevention และ avoidance ★</h2>
+<h2>1.4 การบ้าน: Deadlock ในชีวิตประจำวัน ★</h2>
+<div class="box goal"><span class="t">🎯 ต้องทำได้</span>ยกตัวอย่าง deadlock จากชีวิตจริงได้เอง แปลงเป็น process / resource วาด RAG และ<b>เช็คเงื่อนไขทั้ง 4 ข้อโดยโยงกับเรื่องที่ยกมา</b> ซึ่งเป็นโจทย์ที่อาจารย์ให้ทำเป็นการบ้าน จึงมีโอกาสออกสอบในรูปแบบนี้</div>
+<div class="slides wide local-only">
+  <figure class="slide" data-src="hw2" data-img="hw2-assignment.jpg" data-fig="โจทย์ใน Classroom (Jul 24, 10 points)"></figure>
+  <figure class="slide" data-src="hw2ans" data-img="hw2-answer.jpg" data-fig="งานที่ส่งไป"></figure>
+</div>
+<div class="box"><span class="t">📋 โจทย์ (Classroom, 24 ก.ค.)</span>"ยกตัวอย่าง deadlock ในชีวิตประจำวัน และเขียน resource allocation graph พร้อมทั้งเช็ค 4 เงื่อนไข 1. mutual exclusion 2. hold and wait 3. no preemption 4. circular wait"</div>
+
+<h3>สูตร 5 ขั้น ใช้ตอบโจทย์แบบนี้ได้ทุกเรื่อง</h3>
+<ol>
+  <li><b>เล่าสถานการณ์</b> และกำหนดตัวแปร: ใคร = <b>process</b> (P1, P2, …), ของที่แย่งกัน = <b>resource</b> (R1, R2, …) และของแต่ละอย่างมีกี่ชิ้น = <b>instance</b></li>
+  <li><b>Process state</b> (คำเดียวกับในชีท): แต่ละ process <b>ใช้</b> (hold) อะไรอยู่ และ<b>รอ</b> (wait) อะไร</li>
+  <li><b>วาด RAG</b> โดยใส่ชื่อกำกับทุกวงกลมและทุกกล่อง ลูกศร <b>R → P = ถืออยู่</b>, <b>P → R = รอ/ขอ</b></li>
+  <li><b>หา cycle</b> แล้วเขียนเป็นสาย (เช่น P1 → R2 → P2 → …) และถ้ามีเวลา ให้เขียน <b>allocation matrix / request matrix</b> ด้วย (อาจารย์บอกว่าเรื่องนี้ออก)</li>
+  <li><b>เช็ค 4 เงื่อนไขทีละข้อ</b> โดยโยงกับเรื่องที่ยกมา แล้ว<b>สรุป</b>ว่าเกิด deadlock เพราะครบ 4 ข้อ และถ้าทุก resource มี 1 instance + มี cycle แปลว่า deadlock แน่นอน (bonus: บอกวิธีแก้)</li>
+</ol>
+
+<h3>ตรวจงานที่ส่งไป</h3>
+<div class="grid2">
+  <div class="box idea"><span class="t">✅ ถูกต้องแล้ว</span>
+  • สถานการณ์ดี: ห้องแล็บมีนักศึกษา 3 คน (P1–P3) กับ Printer (R1), Projector (R2), Notebook (R3) อย่างละ 1 instance
+  <br>• process state ถูก: P1 ใช้ R1 รอ R2 / P2 ใช้ R2 รอ R3 / P3 ใช้ R3 รอ R1
+  <br>• cycle ถูก: <b>P1 → R2 → P2 → R3 → P3 → R1 → P1</b>
+  <br>• เช็ค 4 เงื่อนไขครบ และเหตุผลแต่ละข้อถูก</div>
+  <div class="box trap"><span class="t">✏️ เขียนให้ได้คะแนนเต็มกว่านี้</span>
+  • ในรูป RAG กล่องยังไม่มีชื่อ ให้เขียน <b>R1/R2/R3 กำกับกล่อง</b> และให้หัวลูกศรชัดว่าเส้นไหนคือ "ถือ" (R→P) เส้นไหนคือ "รอ" (P→R)
+  <br>• หัวข้อ "Process Type" ในชีทใช้คำว่า <b>"Process State"</b>
+  <br>• ข้อ circular wait ที่เขียนว่า "เกิดการรอเป็นวง" สั้นไป ให้เขียนเป็นสาย: <b>P1 รอ P2 (ถือ R2) → P2 รอ P3 (ถือ R3) → P3 รอ P1 (ถือ R1)</b>
+  <br>• ปิดท้ายด้วย<b>ข้อสรุป</b> และถ้ามีเวลา ให้ใส่ allocation/request matrix กับวิธีแก้</div>
+</div>
+
+<h3>คำตอบตัวอย่างแบบเต็ม (ใช้สถานการณ์เดิม)</h3>
+<div class="box exam"><span class="t">📝 เขียนตอบแบบนี้</span><pre>สถานการณ์: ห้องแล็บมีนักศึกษา 3 คน ต้องใช้อุปกรณ์ร่วมกัน อุปกรณ์ละ 1 เครื่อง
+  P1, P2, P3 = นักศึกษาคนที่ 1, 2, 3
+  R1 = Printer, R2 = Projector, R3 = Notebook   (อย่างละ 1 instance)
+
+Process state
+  P1  ใช้ R1 (Printer)    รอ R2 (Projector)
+  P2  ใช้ R2 (Projector)  รอ R3 (Notebook)
+  P3  ใช้ R3 (Notebook)   รอ R1 (Printer)
+
+Allocation (R→P)        Request (P→R)
+      R1 R2 R3                R1 R2 R3
+  P1   1  0  0            P1   0  1  0
+  P2   0  1  0            P2   0  0  1
+  P3   0  0  1            P3   1  0  0
+  Available = (0, 0, 0)
+
+Cycle: P1 → R2 → P2 → R3 → P3 → R1 → P1
+
+เช็ค 4 เงื่อนไข
+1) Mutual exclusion ✓  อุปกรณ์แต่ละเครื่องใช้ได้ทีละคน (1 instance)
+2) Hold and wait    ✓  ทุกคนถืออุปกรณ์ 1 เครื่อง และรอเครื่องที่คนอื่นถือ
+3) No preemption    ✓  แย่งอุปกรณ์จากคนที่กำลังใช้ไม่ได้ ต้องรอให้เขาปล่อยเอง
+4) Circular wait    ✓  P1 รอ P2 (ถือ R2), P2 รอ P3 (ถือ R3), P3 รอ P1 (ถือ R1)
+สรุป: ครบทั้ง 4 ข้อ และทุก resource มี 1 instance + มี cycle → เกิด deadlock แน่นอน
+วิธีแก้ (ทำลาย 1 ข้อ): เช่น ให้ทุกคนจองอุปกรณ์ตามลำดับเลข R1→R2→R3 เสมอ
+  (ทำลาย circular wait) หรือให้ขอครบทุกเครื่องก่อนค่อยเริ่มใช้ (ทำลาย hold and wait)</pre></div>
+<p>ลองดูกราฟของตัวอย่างนี้ในเครื่องมือ แล้วเลือก "ห้องแล็บ แต่มี Projector 2 เครื่อง" ดูว่าทำไม deadlock ถึงหายไป</p>
+<div data-widget="rag" data-preset="3"></div>
+
+<h3>ตัวอย่างอื่นที่ใช้ตอบได้ (เผื่อข้อสอบให้ยกตัวอย่างเอง)</h3>
+<div class="tblwrap">
+<table class="t left">
+  <tr><th>สถานการณ์</th><th>Process</th><th>Resource</th><th>รอกันแบบไหน</th></tr>
+  <tr><td><b>กินข้าว ช้อนกับส้อม</b></td><td>คน A, คน B</td><td>ช้อน 1 คัน, ส้อม 1 คัน</td><td>A ถือช้อนรอส้อม, B ถือส้อมรอช้อน</td></tr>
+  <tr><td><b>สี่แยกรถติด</b> (รูป 2.4.A ในชีท)</td><td>รถ 4 คัน</td><td>พื้นที่สี่แยก 4 ช่อง</td><td>รถแต่ละคันจอดในช่องหนึ่ง และรอช่องข้างหน้าที่คันอื่นจอดอยู่</td></tr>
+  <tr><td><b>สะพานแคบรถสวนกัน</b></td><td>รถ 2 คัน</td><td>สะพาน 2 ครึ่ง (ฝั่งซ้าย/ขวา)</td><td>แต่ละคันขึ้นมาครึ่งหนึ่งแล้วรออีกครึ่งที่อีกคันอยู่</td></tr>
+  <tr><td><b>โอนเงินข้ามบัญชี</b></td><td>ธุรกรรม T1, T2</td><td>บัญชี X, บัญชี Y (lock)</td><td>T1 ล็อก X รอ Y, T2 ล็อก Y รอ X</td></tr>
+</table>
+</div>
+<div class="box trap"><span class="t">⚠️ ระวังตัวอย่างที่ "ไม่ใช่" deadlock</span>
+• <b>คิวรอซื้อข้าว</b>: รอนานก็จริง แต่คนข้างหน้าซื้อเสร็จก็ไป<b>ไม่มีการรอเป็นวง</b> จึงขาด circular wait
+<br>• <b>ของมีหลายชิ้น</b>: ถ้าห้องแล็บมี Projector 2 เครื่อง แม้จะมี cycle ใน RAG แต่ P1 ได้เครื่องที่ว่าง แล้วทำงานจบได้ จึงไม่ deadlock (เหมือนรูป 2.4.D)</div>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="3"><div class="qt"><span class="qn">Q</span>กินข้าว: A ถือช้อนรอส้อม และ B ถือส้อมรอช้อน ถ้ากำหนดกติกาว่า "ทุกคนต้องหยิบช้อนก่อนส้อมเสมอ" จะทำลายเงื่อนไขใด</div><div class="opts">
+    <button class="opt">Mutual exclusion</button><button class="opt">Hold and wait</button><button class="opt">No preemption</button><button class="opt">Circular wait</button></div>
+    <div class="fb">กำหนดลำดับการขอทรัพยากร (order no.) ทำให้รอกันเป็นวงไม่ได้ จึงทำลาย <b>circular wait</b> เพราะคนที่ได้ช้อนแล้วเท่านั้นถึงจะขอส้อมได้</div></div>
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt"><span class="qn">Q</span>ถ้ากำหนดว่า "ถ้าหยิบส้อมไม่ได้ ต้องวางช้อนคืนก่อนแล้วค่อยรอ" จะทำลายเงื่อนไขใด</div><div class="opts">
+    <button class="opt">Mutual exclusion</button><button class="opt">Hold and wait</button><button class="opt">No preemption</button><button class="opt">Circular wait</button></div>
+    <div class="fb">ตรงกับชีท "if wait → not hold" คือรอได้แต่ห้ามถือของไว้ จึงทำลาย <b>hold and wait</b></div></div>
+  <div class="q" data-type="mcq" data-answer="2"><div class="qt"><span class="qn">Q</span>ถ้าให้พนักงานร้าน "ยึดช้อนจาก A ไปให้ B ได้" จะทำลายเงื่อนไขใด</div><div class="opts">
+    <button class="opt">Mutual exclusion</button><button class="opt">Hold and wait</button><button class="opt">No preemption</button><button class="opt">Circular wait</button></div>
+    <div class="fb">ยึดทรัพยากรคืนจากคนที่ถืออยู่ได้ = allow preemption จึงทำลาย <b>no preemption</b></div></div>
+  <div class="q" data-type="open"><div class="qt"><span class="qn">Q</span>ลองยกตัวอย่าง deadlock ในชีวิตประจำวัน<b>เรื่องใหม่</b>ของตัวเอง แล้วทำตามสูตร 5 ขั้น (เขียนลงกระดาษก่อนค่อยดูเฉลย)</div>
+    <div class="ans">ตัวอย่าง: <b>สะพานแคบ</b> P1 = รถฝั่งซ้าย, P2 = รถฝั่งขวา, R1 = สะพานครึ่งซ้าย, R2 = สะพานครึ่งขวา (อย่างละ 1)
+    <br>Process state: P1 ใช้ R1 รอ R2 / P2 ใช้ R2 รอ R1 → cycle P1 → R2 → P2 → R1 → P1
+    <br>ME ✓ (ครึ่งสะพานรถอยู่ได้ทีละคัน) · Hold &amp; wait ✓ (อยู่บนครึ่งหนึ่งแล้วรออีกครึ่ง) · No preemption ✓ (ยกรถออกไม่ได้ ต้องถอยเอง) · Circular wait ✓ (P1 รอ P2, P2 รอ P1)
+    <br>สรุป: ครบ 4 ข้อ + 1 instance + มี cycle → deadlock แน่นอน วิธีแก้คือติดไฟจราจรให้ขึ้นได้ทีละฝั่ง (ขอทั้งสะพานในครั้งเดียว = ทำลาย hold and wait)
+    <br>ตรวจงานตัวเองโดยดูว่า <b>(1)</b> มีการรอเป็นวงจริงไหม <b>(2)</b> ทุกข้อโยงกับเรื่องที่ยกมาไหม <b>(3)</b> RAG ใส่ชื่อและทิศลูกศรถูกไหม</div></div>
+</div>
+
+<h2>1.5 วิธีจัดการ deadlock: prevention และ avoidance ★</h2>
 <div class="slides one">
   <figure class="slide" data-src="dl" data-page="5" data-img="dl-p05-methods.jpg" data-fig="2.4.2 Method for handling deadlock" data-t="286"></figure>
 </div>
@@ -143,7 +235,7 @@ P3     0  0  0  0</pre></div>
 </ul>
 <div class="box idea"><span class="t">💡 ทำไมชื่อ Banker</span>ธนาคารมีเงินสดจำกัด ลูกค้าแต่ละรายประกาศวงเงินสูงสุด (Max) ไว้ ธนาคารจะปล่อยกู้เพิ่มก็ต่อเมื่อมั่นใจว่ายังมีลำดับที่ทุกคนกู้ได้ครบแล้วคืนเงินได้ ถ้าปล่อยแล้วอาจมีคนติดค้างกันหมด ก็ให้รอก่อน</div>
 
-<h2>1.5 Banker's Algorithm ★</h2>
+<h2>1.6 Banker's Algorithm ★</h2>
 <div class="box goal"><span class="t">🎯 ต้องทำได้</span>หา Total, Need และ safe sequence ได้ และตอบได้ว่าคำขอ (request) ให้ได้หรือไม่ พร้อมเหตุผล</div>
 <div class="slides wide">
   <figure class="slide" data-src="dl" data-page="5" data-img="dl-p06-struct.jpg" data-fig="โครงสร้างข้อมูล: Resource, Process, Available, Max" data-t="308"></figure>
@@ -242,7 +334,7 @@ safe sequence = &lt;P1, P3, P4, P5, P2&gt;</pre></div></div>
 <p>ฝึกเพิ่มด้วยโจทย์สุ่ม (ระบบตรวจ safe sequence ที่เราตอบได้ทุกแบบที่ถูก):</p>
 <div data-widget="gen" data-kind="banker"></div>
 
-<h2>1.6 Deadlock detection</h2>
+<h2>1.7 Deadlock detection</h2>
 <div class="slides wide">
   <figure class="slide" data-src="dl" data-page="14" data-img="dl-p14-waitfor.jpg" data-fig="2.4.2.3 Deadlock Detection (wait-for graph)" data-t="344"></figure>
   <figure class="slide" data-src="dl" data-page="15" data-img="dl-p15-detalgo.jpg" data-fig="Detection algorithm" data-t="346"></figure>
@@ -265,6 +357,7 @@ safe sequence = &lt;P1, P3, P4, P5, P2&gt;</pre></div></div>
 <ul>
   <li>เงื่อนไข 4 ข้อ: ME, Hold &amp; wait, No preemption, Circular wait (necessary ไม่ใช่ sufficient)</li>
   <li>RAG: P→R = request, R→P = allocation; instance เดียว + cycle = deadlock</li>
+  <li>การบ้านชีวิตประจำวัน: สถานการณ์ → process state → RAG → cycle/matrix → เช็ค 4 ข้อ + สรุป</li>
   <li>Prevention: ขอทั้งหมด / ถ้ารอห้ามถือ, ยอม preempt, ให้เลขลำดับ</li>
   <li>Avoidance: safe/unsafe → Banker's: Need = Max − Alloc, Work += Alloc</li>
   <li>Request: ≤ Need → ≤ Available → ลองให้ → ยัง safe ไหม</li>

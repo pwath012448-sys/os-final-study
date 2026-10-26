@@ -25,6 +25,8 @@
     clip: { name: "คลิปอาจารย์ (วาดใน Paint)", file: null },
     hw: { name: "การบ้านใน Classroom (Sep 18, due Sep 24)", file: null },
     hwans: { name: "คำตอบการบ้านที่ส่งไป (ไฟล์ในโฟลเดอร์ ass)", file: null },
+    hw2: { name: "การบ้านใน Classroom (Jul 24, due Aug 1)", file: null },
+    hw2ans: { name: "งานที่ส่งไป (ไฟล์ในโฟลเดอร์ ass)", file: null },
   };
 
   const UI = {};
