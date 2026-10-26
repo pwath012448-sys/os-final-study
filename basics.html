@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0 ปูพื้นฐาน — ติว OS Final</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+<aside class="toc"></aside>
+<main>
+<h1>บทที่ 0 · ปูพื้นฐานก่อนเริ่ม</h1>
+<p class="lead">อ่านหน้านี้ก่อน ถ้ายังไม่คล่องเรื่อง CPU / RAM / process / address / เลขฐาน 2 ทุกบทที่เหลือใช้ความรู้จากหน้านี้ ใช้เวลาอ่านประมาณ 20 นาที</p>
+
+<h2>0.1 ในคอมพิวเตอร์มีอะไรที่ OS ต้องดูแล</h2>
+<div class="learn">
+<h4>คืออะไร</h4>
+<table class="t left">
+  <tr><th>ชิ้นส่วน</th><th>ทำหน้าที่</th><th>คุณสมบัติที่ต้องจำ</th></tr>
+  <tr><td><b>CPU</b></td><td>ทำงานตามคำสั่งของโปรแกรมทีละคำสั่ง</td><td>เร็วมาก แต่ทำได้ทีละงาน (ต่อ 1 core)</td></tr>
+  <tr><td><b>RAM / main memory</b> (หน่วยความจำหลัก)</td><td>ที่วางโปรแกรมและข้อมูลที่<b>กำลังใช้</b> CPU อ่านจากที่นี่ได้โดยตรง</td><td>เร็ว แต่มีขนาดเล็ก และเป็น <b>volatile</b> (ไฟดับแล้วข้อมูลหาย)</td></tr>
+  <tr><td><b>Disk / secondary storage</b> (หน่วยความจำสำรอง)</td><td>เก็บไฟล์และโปรแกรมแบบถาวร</td><td>ใหญ่ ถาวร แต่<b>ช้ากว่า RAM มาก</b> CPU อ่านตรงไม่ได้ ต้องโหลดเข้า RAM ก่อน</td></tr>
+  <tr><td><b>I/O devices</b></td><td>เครื่องพิมพ์, คีย์บอร์ด, จอ, เครือข่าย</td><td>หลายอย่างใช้ได้ทีละคน (เช่น เครื่องพิมพ์)</td></tr>
+</table>
+<h4>เปรียบเทียบให้เห็นภาพ: ร้านอาหาร</h4>
+<p><b>CPU</b> = พ่อครัว (ทำอาหารทีละจาน) · <b>RAM</b> = เคาน์เตอร์ในครัว (หยิบใช้ได้ทันที แต่ที่น้อย) · <b>Disk</b> = ห้องเก็บของหลังร้าน (เก็บได้เยอะแต่ต้องเดินไปหยิบ) · <b>OS</b> = ผู้จัดการร้าน ที่คอยแบ่งว่าใครใช้เตาเมื่อไร วางของตรงไหนบนเคาน์เตอร์ และเก็บอะไรไว้หลังร้าน</p>
+</div>
+
+<h2>0.2 OS (Operating System) ทำอะไร</h2>
+<div class="learn">
+<h4>คืออะไร</h4>
+<p>OS คือโปรแกรมที่<b>ดูแลและแบ่งทรัพยากร</b> (CPU, หน่วยความจำ, ไฟล์, อุปกรณ์) ให้หลายโปรแกรมใช้ร่วมกันได้อย่างปลอดภัยและคุ้มค่า ส่วนที่เป็นแกนกลางของ OS เรียกว่า <b>kernel</b></p>
+<h4>แต่ละบทของวิชาคือ "ปัญหาการแบ่งทรัพยากร" คนละแบบ</h4>
+<table class="t left">
+  <tr><th>บท</th><th>ปัญหาที่ OS ต้องแก้</th></tr>
+  <tr><td>1 Deadlock</td><td>หลายโปรแกรม<b>แย่งทรัพยากร</b>กันจนค้างกันหมด</td></tr>
+  <tr><td>2 Memory</td><td>จะ<b>วางหลายโปรแกรมใน RAM</b> ตรงไหน และแปลง address อย่างไร</td></tr>
+  <tr><td>3 Virtual memory</td><td>RAM ไม่พอ จะ<b>ใช้ดิสก์ช่วย</b>และเลือกว่าจะเก็บอะไรไว้ใน RAM อย่างไร</td></tr>
+  <tr><td>4 Storage</td><td>จะ<b>จัดพื้นที่บนดิสก์</b> (ช่องว่าง, การวางไฟล์, ลำดับการอ่าน) อย่างไร</td></tr>
+  <tr><td>5 File &amp; protection</td><td>จะ<b>จัดไฟล์</b>และ<b>กันไม่ให้คนที่ไม่มีสิทธิ์</b>เข้าถึงอย่างไร</td></tr>
+</table>
+</div>
+
+<h2>0.3 Program กับ process และ PCB</h2>
+<div class="learn">
+<h4>คืออะไร</h4>
+<ul>
+  <li><b>Program</b> = ไฟล์คำสั่งที่เก็บอยู่บนดิสก์เฉยๆ (เช่น <code>chrome.exe</code>)</li>
+  <li><b>Process</b> = program ที่<b>กำลังทำงาน</b> ถูกโหลดเข้า RAM แล้ว มีสถานะของตัวเอง (เปิด Chrome 2 หน้าต่าง = program เดียว แต่มี 2 process)</li>
+  <li><b>PCB (Process Control Block)</b> = "บัตรประจำตัว" ของ process ที่ OS เก็บไว้ ข้างในมี: สถานะ (ready/running/waiting), <b>program counter</b> (ทำถึงคำสั่งไหนแล้ว), ค่าใน register, ข้อมูลหน่วยความจำ (เช่น base/limit, page table) และไฟล์ที่เปิดอยู่</li>
+</ul>
+<h4>Context switch ทำงานยังไง</h4>
+<p>CPU มีตัวเดียวแต่มีหลาย process ต้องสลับกันใช้ ตอนสลับ OS จะ:</p>
+<div class="flow"><span>1. หยุด P1</span><i>→</i><span>2. <b>save</b> สถานะ P1 ลง PCB ของ P1</span><i>→</i><span>3. <b>load</b> สถานะ P2 จาก PCB ของ P2</span><i>→</i><span>4. ให้ P2 ทำงานต่อจากเดิม</span></div>
+<p>เหมือนคั่นหนังสือ: วางเล่มแรกพร้อมคั่นหน้าไว้ หยิบอีกเล่มที่คั่นไว้ขึ้นมาอ่านต่อ (อาจารย์บอกว่าเรื่อง save/load PCB "ถามนิดหน่อย")</p>
+</div>
+
+<h2>0.4 Multiprogramming และ Round Robin (RR)</h2>
+<div class="learn">
+<h4>คืออะไร</h4>
+<ul>
+  <li><b>Multiprogramming</b> = มีหลาย process อยู่ในหน่วยความจำพร้อมกัน เพื่อให้ CPU มีงานทำตลอด</li>
+  <li><b>Ready queue</b> = คิวของ process ที่พร้อมรัน รอ CPU</li>
+  <li><b>RR (Round Robin)</b> = แบ่งเวลาให้แต่ละ process ใช้ CPU คนละเท่าๆ กัน เรียกว่า <b>time quantum</b> (เช่น 1 ms) หมดเวลาแล้วไปต่อท้ายคิว วนไปเรื่อยๆ จนทำงานเสร็จ</li>
+</ul>
+<h4>ตัวอย่าง: RR quantum = 1, P1 ต้องใช้ 2 ms, P2 ต้องใช้ 1 ms</h4>
+<pre>เวลา 0-1: P1 (เหลือ 1)  → ไปต่อท้ายคิว
+เวลา 1-2: P2 (เหลือ 0)  → จบที่เวลา 2
+เวลา 2-3: P1 (เหลือ 0)  → จบที่เวลา 3</pre>
+<p>ความรู้นี้ใช้ในตัวอย่าง 3.1.ก ของบท Memory</p>
+</div>
+
+<h2>0.5 Address คืออะไร</h2>
+<div class="learn">
+<h4>คืออะไร</h4>
+<p>หน่วยความจำคือ<b>ช่องเก็บข้อมูลเรียงต่อกันยาวๆ</b> แต่ละช่องเก็บได้ 1 <b>byte</b> และมี "<b>บ้านเลขที่</b>" ของตัวเอง เรียกว่า <b>address</b> เริ่มจาก 0, 1, 2, … ไปเรื่อยๆ</p>
+<pre>address :  0    1    2    3    4    5   ...
+ข้อมูล   : [A]  [B]  [C]  [D]  [E]  [F]  ...</pre>
+<h4>หน่วยที่ต้องรู้</h4>
+<ul>
+  <li>1 <b>K</b> (KB) = <b>1024</b> byte = 2<sup>10</sup> (ในวิชานี้ "K" คือ 1024 ไม่ใช่ 1000)</li>
+  <li>1 M (MB) = 1024 K = 2<sup>20</sup></li>
+  <li>address ขนาด <b>n บิต</b> → อ้างได้ <b>2<sup>n</sup></b> ช่อง เช่น 16 บิต → 2<sup>16</sup> = 65,536 ช่อง = 64 K</li>
+</ul>
+<h4>ทำไมต้องสนใจ</h4>
+<p>โปรแกรมทุกตัวอ้างข้อมูลด้วย address และ OS ต้องคอยแปลงว่า "address ที่โปรแกรมคิดว่าใช้" ตรงกับ "ช่องจริงใน RAM ช่องไหน" (เรียนในบท Memory และ Virtual memory)</p>
+</div>
+
+<h2>0.6 เลขฐาน 2 ฉบับเร่งรัด (ใช้ใน paging)</h2>
+<div class="learn">
+<h4>ค่าประจำหลัก</h4>
+<pre>2^0=1   2^1=2   2^2=4    2^3=8    2^4=16   2^5=32
+2^6=64  2^7=128 2^8=256  2^9=512  2^10=1024</pre>
+<h4>แปลงฐาน 10 → ฐาน 2 (ตัวอย่าง 25)</h4>
+<pre>25 = 16 + 8 + 1  →  หลัก 16 8 4 2 1  =  1 1 0 0 1   → 25 = 11001₂</pre>
+<h4>แปลงฐาน 2 → ฐาน 10 (ตัวอย่าง 000110)</h4>
+<pre>000110 = 4 + 2 = 6</pre>
+<h4>เคล็ดลับสำคัญของ paging: หารด้วย 2ⁿ = ตัดบิตขวา n ตัว</h4>
+<p>ถ้า page size = 2<sup>n</sup> แล้ว:
+<b>d (offset) = n บิตขวาสุด</b> และ <b>p (page number) = บิตที่เหลือด้านซ้าย</b> ซึ่งได้ผลเท่ากับการหาร: p = address div 2<sup>n</sup> และ d = address mod 2<sup>n</sup></p>
+<pre>ตัวอย่าง 1502 (16 บิต), page = 1024 = 2^10
+1502 = 0000010111011110
+       ^^^^^^ ^^^^^^^^^^
+       p = 1   d = 478        (เช็ค: 1×1024 + 478 = 1502 ✓)</pre>
+</div>
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="num" data-answer="13"><div class="qt">13 เขียนเป็นฐาน 2 แล้วแปลงกลับ ได้เท่าไร (ตอบ 13 ถ้าเข้าใจว่า 1101 = 8+4+1)</div><div class="ans">13 = 8 + 4 + 1 = 1101₂</div></div>
+  <div class="q" data-type="num" data-answer="4096"><div class="qt">address 12 บิต อ้างได้กี่ช่อง</div><div class="ans">2<sup>12</sup> = 4096</div></div>
+  <div class="q" data-type="text" data-answer="2,8|2และ8|p=2d=8"><div class="qt">address = 40, page size = 16 จงหา p และ d (ตอบเช่น 2,8)</div><div class="ans">p = 40 div 16 = 2, d = 40 mod 16 = 8</div></div>
+</div></div>
+
+<h2>0.7 อ่านสัญลักษณ์ในโจทย์ให้เป็น</h2>
+<div class="learn">
+<ul>
+  <li><b>div</b> = หารเอาส่วน (ปัดทิ้ง) เช่น 10 div 4 = 2 · <b>mod</b> = เศษ เช่น 10 mod 4 = 2</li>
+  <li><b>เวกเตอร์</b> (a, b, c) = ตัวเลขหลายช่องคู่กัน ใช้แทนทรัพยากรหลายชนิด เช่น Available = (3, 3, 2) คือ R1 ว่าง 3, R2 ว่าง 3, R3 ว่าง 2</li>
+  <li><b>(1,2,2) ≤ (3,3,2)</b> แปลว่า<b>ทุกช่อง</b>ต้องน้อยกว่าหรือเท่ากัน: 1≤3 ✓, 2≤3 ✓, 2≤2 ✓ → จริง แต่ (6,0,0) ≤ (5,3,2) ไม่จริง เพราะ 6 &gt; 5</li>
+  <li><b>Matrix</b> = ตาราง แถว = process, คอลัมน์ = ชนิดทรัพยากร เช่น Allocation[P2][R1] = 2 คือ P2 ถือ R1 อยู่ 2 ชิ้น</li>
+</ul>
+</div>
+
+<h2>0.8 คำศัพท์: อะไรคืออะไร</h2>
+<p class="muted">เรียงตามบท กด Ctrl+F (หรือ "ค้นหาในหน้า" บน iPad) เพื่อหาคำได้</p>
+<div class="tblwrap">
+<table class="t left gloss">
+<tr><th>คำ</th><th>ความหมายแบบง่าย</th><th>บท</th></tr>
+<tr><td>Process</td><td>โปรแกรมที่กำลังทำงานอยู่</td><td>0</td></tr>
+<tr><td>PCB</td><td>บัตรประจำตัว process (สถานะ, PC, register, ข้อมูลหน่วยความจำ)</td><td>0</td></tr>
+<tr><td>Context switch</td><td>สลับ CPU จาก process หนึ่งไปอีกตัว โดย save/load PCB</td><td>0</td></tr>
+<tr><td>Time quantum</td><td>เวลาที่ RR แบ่งให้แต่ละ process ต่อรอบ</td><td>0</td></tr>
+<tr><td>Resource</td><td>ทรัพยากรที่ process ต้องใช้ เช่น memory, CPU, file, เครื่องพิมพ์</td><td>1</td></tr>
+<tr><td>Instance</td><td>จำนวนชิ้นของทรัพยากรชนิดเดียวกัน (เครื่องพิมพ์ 3 เครื่อง = 3 instances)</td><td>1</td></tr>
+<tr><td>Deadlock</td><td>กลุ่ม process รอทรัพยากรที่อีกฝ่ายถือ จนไม่มีใครทำงานต่อได้</td><td>1</td></tr>
+<tr><td>Mutual exclusion</td><td>ทรัพยากรใช้ได้ทีละ process</td><td>1</td></tr>
+<tr><td>Hold and wait</td><td>ถือของไว้แล้วรอของเพิ่ม</td><td>1</td></tr>
+<tr><td>No preemption</td><td>ยึดทรัพยากรคืนจาก process ไม่ได้</td><td>1</td></tr>
+<tr><td>Circular wait</td><td>รอกันเป็นวง P0 → P1 → … → P0</td><td>1</td></tr>
+<tr><td>RAG</td><td>Resource-Allocation Graph แผนภาพว่าใครถืออะไร ใครรออะไร</td><td>1</td></tr>
+<tr><td>Allocation / Request matrix</td><td>ตารางว่าแต่ละ process ถือ / ขอทรัพยากรอะไรกี่ชิ้น</td><td>1</td></tr>
+<tr><td>Prevention</td><td>ป้องกันโดยทำลายเงื่อนไขข้อใดข้อหนึ่ง</td><td>1</td></tr>
+<tr><td>Avoidance</td><td>ก่อนให้ทรัพยากร คำนวณก่อนว่ายังปลอดภัย (safe) ไหม</td><td>1</td></tr>
+<tr><td>Safe state / sequence</td><td>มีลำดับการรันที่ทุก process ทำงานจบได้</td><td>1</td></tr>
+<tr><td>Banker's algorithm</td><td>วิธีตรวจ safe state ด้วย Max, Allocation, Need, Available</td><td>1</td></tr>
+<tr><td>Detection</td><td>ปล่อยให้เกิดแล้วตรวจหาว่ามี deadlock ไหม</td><td>1</td></tr>
+<tr><td>Address binding</td><td>การกำหนดว่าชื่อในโปรแกรมจะไปอยู่ที่ address จริงตัวไหน</td><td>2</td></tr>
+<tr><td>Logical address</td><td>address ที่โปรแกรม/CPU อ้าง (เริ่มนับจาก 0 ของโปรแกรมนั้น)</td><td>2</td></tr>
+<tr><td>Physical address</td><td>ตำแหน่งจริงใน RAM</td><td>2</td></tr>
+<tr><td>MMU</td><td>ฮาร์ดแวร์ที่แปลง logical → physical</td><td>2</td></tr>
+<tr><td>Base / relocation register</td><td>เก็บตำแหน่งเริ่มต้นของ process ใน RAM (เอาไปบวก logical)</td><td>2</td></tr>
+<tr><td>Limit register</td><td>เก็บขนาดของ process ใช้ตรวจว่าอ้างเกินไหม</td><td>2</td></tr>
+<tr><td>Dynamic loading</td><td>โหลดส่วนของโปรแกรมเฉพาะตอนที่ถูกเรียกใช้</td><td>2</td></tr>
+<tr><td>Static / dynamic linking</td><td>รวม library เข้าไฟล์เลย / ลิงก์ตอนรัน</td><td>2</td></tr>
+<tr><td>Overlay</td><td>ให้ส่วนของโปรแกรมผลัดกันใช้พื้นที่เดียวกัน</td><td>2</td></tr>
+<tr><td>Swapping</td><td>ย้าย process ออกไปดิสก์ชั่วคราว (swap out) แล้วเอาอีกตัวเข้า (swap in)</td><td>2</td></tr>
+<tr><td>Backing store</td><td>พื้นที่บนดิสก์ที่ใช้เก็บ process ที่ถูก swap ออก</td><td>2</td></tr>
+<tr><td>Partition</td><td>ช่วงของหน่วยความจำที่แบ่งให้ process</td><td>2</td></tr>
+<tr><td>Hole</td><td>ช่วงหน่วยความจำที่ว่าง</td><td>2</td></tr>
+<tr><td>First / best / worst fit</td><td>วางใน hole แรกที่พอ / เล็กสุดที่พอ / ใหญ่สุด</td><td>2</td></tr>
+<tr><td>External fragmentation</td><td>ที่ว่างรวมพอ แต่กระจายเป็นชิ้นเล็ก ไม่ติดกัน</td><td>2</td></tr>
+<tr><td>Internal fragmentation</td><td>ได้พื้นที่เกินที่ขอ ส่วนเกินถูกทิ้งไว้ในก้อนนั้น</td><td>2</td></tr>
+<tr><td>Compaction</td><td>ย้ายโปรเซสให้ชิดกัน เพื่อรวมที่ว่างเป็นก้อนเดียว</td><td>2</td></tr>
+<tr><td>Paging</td><td>ตัดโปรแกรมเป็นชิ้นเท่ากัน (page) ลงช่องเท่ากันใน RAM (frame)</td><td>2</td></tr>
+<tr><td>Page / Frame</td><td>ชิ้นของ logical memory / ช่องของ physical memory (ขนาดเท่ากัน)</td><td>2</td></tr>
+<tr><td>Page table</td><td>ตารางบอกว่า page ไหนอยู่ frame ไหน</td><td>2</td></tr>
+<tr><td>Offset (d)</td><td>ตำแหน่งภายใน page / frame</td><td>2</td></tr>
+<tr><td>TLB</td><td>cache เล็กๆ ของ page table ช่วยแปลง address เร็วขึ้น</td><td>2</td></tr>
+<tr><td>Segmentation</td><td>แบ่งโปรแกรมเป็นส่วนตามความหมาย (code, stack, …) ขนาดไม่เท่ากัน</td><td>2</td></tr>
+<tr><td>Virtual memory</td><td>ทำให้ดูเหมือนมีหน่วยความจำใหญ่กว่า RAM จริง โดยใช้ดิสก์ช่วย</td><td>3</td></tr>
+<tr><td>Demand paging</td><td>โหลด page เข้า RAM เฉพาะตอนที่ต้องใช้</td><td>3</td></tr>
+<tr><td>Valid–invalid bit</td><td>v = page อยู่ใน RAM, i = ไม่อยู่</td><td>3</td></tr>
+<tr><td>Page fault</td><td>อ้าง page ที่ไม่อยู่ใน RAM ต้องไปโหลดจากดิสก์</td><td>3</td></tr>
+<tr><td>Reference string</td><td>ลำดับเลข page ที่ถูกอ้าง ใช้จำลอง page replacement</td><td>3</td></tr>
+<tr><td>Page replacement</td><td>เลือกว่าจะเอา page ไหนออกเมื่อ frame เต็ม</td><td>3</td></tr>
+<tr><td>FIFO / OPT / LRU / LFU / MFU</td><td>เข้าก่อนออกก่อน / ไกลสุดในอนาคต / ไม่ได้ใช้นานสุด / ใช้น้อยครั้งสุด / ใช้มากครั้งสุด</td><td>3</td></tr>
+<tr><td>Page fault rate</td><td>จำนวน fault ÷ จำนวนครั้งที่อ้าง</td><td>3</td></tr>
+<tr><td>Belady's anomaly</td><td>เพิ่ม frame แล้ว fault กลับเพิ่ม (เกิดกับ FIFO)</td><td>3</td></tr>
+<tr><td>Thrashing</td><td>สลับ page เข้าออกจนไม่ได้ทำงานจริง</td><td>3</td></tr>
+<tr><td>Block</td><td>หน่วยพื้นที่บนดิสก์ (ดิสก์แบ่งเป็นบล็อกเท่าๆ กัน)</td><td>4</td></tr>
+<tr><td>Free-space management</td><td>วิธีจำว่าบล็อกไหนว่าง (bit vector, linked list, grouping, counting)</td><td>4</td></tr>
+<tr><td>Allocation method</td><td>วิธีวางบล็อกของไฟล์ (contiguous, linked, indexed)</td><td>4</td></tr>
+<tr><td>FAT</td><td>ตารางเก็บว่าบล็อกถัดไปของแต่ละไฟล์คือบล็อกไหน</td><td>4</td></tr>
+<tr><td>Seek / head movement</td><td>การเลื่อนหัวอ่านไปยัง track ที่ต้องการ</td><td>4</td></tr>
+<tr><td>File property</td><td>ข้อมูลของไฟล์: ชื่อ, ชนิด, ตำแหน่ง, ขนาด, สิทธิ์, เวลา</td><td>5</td></tr>
+<tr><td>Directory</td><td>สมุดรายชื่อไฟล์ (โฟลเดอร์)</td><td>5</td></tr>
+<tr><td>Absolute / relative path</td><td>เส้นทางเริ่มจาก root / เริ่มจากโฟลเดอร์ปัจจุบัน</td><td>5</td></tr>
+<tr><td>rwx</td><td>สิทธิ์อ่าน (4) เขียน (2) รัน (1) ของ owner / group / others</td><td>5</td></tr>
+<tr><td>Domain / access matrix</td><td>ชุดสิทธิ์ / ตารางว่าแต่ละ domain ทำอะไรกับ object ไหนได้</td><td>5</td></tr>
+<tr><td>State machine</td><td>ระบบที่มีสถานะ และเปลี่ยนสถานะตาม input (transition)</td><td>5</td></tr>
+</table>
+</div>
+
+<div class="nextprev"><a href="index.html">← หน้าแรก</a><a class="r" href="deadlock.html">บทที่ 1 Deadlock →</a></div>
+</main>
+</div>
+<script src="assets/core.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/widgets.js"></script>
+</body>
+</html>

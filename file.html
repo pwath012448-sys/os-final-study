@@ -24,6 +24,15 @@
   <figure class="slide" data-src="file" data-page="1" data-img="file-p01.jpg" data-fig="รูปที่ 4.1.A field → record → file → database" data-t="1462"></figure>
   <figure class="slide" data-src="file" data-page="2" data-img="file-p02.jpg" data-fig="รูปที่ 4.1.B layered file system + 4.1.2 file operations" data-t="1496"></figure>
 </div>
+<div class="learn">
+<h4>🤔 ไฟล์คืออะไร</h4>
+<p><b>File</b> = ข้อมูลที่ถูกเก็บไว้ในหน่วยความจำสำรองแบบมีชื่อเรียก เพื่อให้ผู้ใช้และโปรแกรมเรียกใช้ได้ภายหลัง ส่วน OS ทำหน้าที่ซ่อนรายละเอียดของดิสก์ (บล็อก, track) ให้เราเห็นเป็นแค่ "ไฟล์ชื่อนี้"</p>
+<h4>⚙️ ข้อมูลซ้อนกันเป็นชั้นๆ (รูป 4.1.A) — ตัวอย่างข้อมูลพนักงาน</h4>
+<pre>Field    : code001   |   Mr. Sombat Tanee   |   5000        ← ข้อมูลทีละช่อง
+Record   : code001 : Mr. Sombat Tanee : 5000                ← 1 แถว = 1 คน
+File     : เรคคอร์ดของพนักงานทุกคน (หลายแถว)
+Database : หลายไฟล์ที่เชื่อมกัน (ไฟล์พนักงาน + ไฟล์แผนก + ไฟล์เงินเดือน)</pre>
+</div>
 <ul>
   <li><b>Field</b> = ข้อมูลแต่ละชนิด (รหัส, ชื่อ, เงินเดือน) → <b>Record</b> = กลุ่มฟิลด์ 1 แถว เช่น <code>code001 : Mr. Sombat Tanee : 5000</code> → <b>File</b> = กลุ่มเรคคอร์ดแบบเดียวกัน → <b>Database</b> = กลุ่มไฟล์ที่มีความสัมพันธ์กัน</li>
 </ul>
@@ -34,12 +43,32 @@
 [2] Basic file system         อ่าน/เขียนบล็อกตามตำแหน่งกายภาพ เช่น drive1, cylinder 70, surface 2, sector 5
 [1] I/O control               device driver + interrupt handler
     Devices</pre>
+<div class="learn">
+<h4>⚙️ ทำไมต้องแบ่งเป็นชั้น และทำงานยังไง</h4>
+<p>แต่ละชั้นทำงานของตัวเองแล้วส่งต่อให้ชั้นล่าง จึงแก้หรือเปลี่ยนชั้นหนึ่งได้โดยไม่กระทบชั้นอื่น (เช่น เปลี่ยนรุ่นดิสก์ก็แก้แค่ device driver) ลองดูว่าคำสั่ง "อ่านไฟล์ report.txt" ไหลผ่านชั้นต่างๆ อย่างไร:</p>
+<ol>
+  <li><b>Application</b>: โปรแกรมสั่ง <code>read("report.txt")</code></li>
+  <li><b>Logical file system</b>: ดู directory ว่าไฟล์ชื่อนี้มีอยู่ไหม มีสิทธิ์อ่านไหม และข้อมูลของไฟล์อยู่ตรงไหน</li>
+  <li><b>File-organization module</b>: แปลงว่า "byte ที่ 0–4095 ของไฟล์" อยู่<b>บล็อกเลขอะไร</b> บนดิสก์</li>
+  <li><b>Basic file system</b>: สั่งอ่านบล็อกนั้นตามตำแหน่งกายภาพ (drive, cylinder, surface, sector)</li>
+  <li><b>I/O control</b>: device driver สั่งงานฮาร์ดแวร์จริง และรับ interrupt เมื่ออ่านเสร็จ</li>
+</ol>
+</div>
 <p><b>File operations</b>: create, write, read, delete, reset (ชี้กลับต้นไฟล์) + open, close, seek, attribute, rename, append</p>
 
 <h2>5.2 Access methods</h2>
 <div class="slides">
   <figure class="slide" data-src="file" data-page="3" data-img="file-p03.jpg" data-fig="รูปที่ 4.1.C sequential, 4.1.D sequential บน direct"></figure>
   <figure class="slide" data-src="file" data-page="4" data-img="file-p04.jpg" data-fig="รูปที่ 4.1.E ISAM + 4.1.4 directory"></figure>
+</div>
+<div class="learn">
+<h4>🤔 Access method คืออะไร</h4>
+<p>คือวิธี<b>เข้าถึงข้อมูลข้างในไฟล์</b> ซึ่งมี 3 แบบ</p>
+<ul>
+  <li><b>Sequential</b> = อ่านเรียงจากต้นไปท้ายทีละส่วน เหมือน<b>เทปคาสเซ็ต</b> อยากฟังเพลงที่ 5 ต้องกรอผ่านเพลง 1–4 ก่อน ระบบจำ "ตำแหน่งปัจจุบัน" (current position) ไว้ อ่านทีไรก็ขยับไปข้างหน้า</li>
+  <li><b>Direct</b> = กระโดดไปบล็อกที่ต้องการได้ทันที เหมือน<b>เลือกเพลงจากเพลย์ลิสต์</b> (ดิสก์ทำได้ เพราะทุกบล็อกมีเลข)</li>
+  <li><b>ISAM</b> = มี<b>สารบัญซ้อนสารบัญ</b> เหมือนหนังสือเล่มหนา ดูสารบัญหลัก → สารบัญย่อย → หน้าที่ต้องการ แล้วค่อยไล่อ่านตามลำดับในหน้านั้น</li>
+</ul>
 </div>
 <ul>
   <li><b>Sequential access</b> (แบบเทป) อ่าน/เขียนตามลำดับ ใช้ rewind ย้อนกลับ</li>
@@ -51,6 +80,10 @@
 <div class="slides">
   <figure class="slide" data-src="file" data-page="4" data-img="file-p04.jpg" data-fig="4.1.4 directory structure (file name, type, location, size, …)"></figure>
   <figure class="slide" data-src="file" data-page="5" data-img="file-p05.jpg" data-fig="protection, time and date, directory operations, single-level"></figure>
+</div>
+<div class="learn">
+<h4>🤔 File property คืออะไร</h4>
+<p>คือ<b>ข้อมูลเกี่ยวกับไฟล์</b> (ไม่ใช่เนื้อหาในไฟล์) ที่ OS เก็บไว้ใน directory เช่น ชื่อ อยู่ตรงไหนบนดิสก์ ใหญ่เท่าไร ใครทำอะไรได้บ้าง เหมือนข้อมูลที่เห็นเมื่อคลิกขวาที่ไฟล์แล้วกด Properties</p>
 </div>
 <table class="t left">
   <tr><th>Property</th><th>ความหมาย</th></tr>
@@ -70,6 +103,18 @@
   <figure class="slide" data-src="file" data-page="7" data-img="file-p07.jpg" data-fig="รูปที่ 4.1.H tree-structure" data-t="1516"></figure>
   <figure class="slide" data-src="file" data-page="8" data-img="file-p08.jpg" data-fig="รูปที่ 4.1.I acyclic graph"></figure>
   <figure class="slide" data-src="file" data-page="9" data-img="file-p09.jpg" data-fig="รูปที่ 4.1.J general graph"></figure>
+</div>
+<div class="learn">
+<h4>🤔 Directory คืออะไร ทำไมต้องมีหลายแบบ</h4>
+<p><b>Directory</b> (หรือโฟลเดอร์) = สมุดรายชื่อไฟล์ ที่จดว่ามีไฟล์อะไรบ้าง และ property ของแต่ละไฟล์ ปัญหาคือ เมื่อมีไฟล์เยอะและมีผู้ใช้หลายคน จะจัดยังไงให้หาง่าย และชื่อไม่ชนกัน จึงมีโครงสร้างหลายแบบ ไล่จากง่ายไปยืดหยุ่น:</p>
+<ol>
+  <li><b>Single-level</b> = ลิ้นชักเดียวใส่ทุกไฟล์ของทุกคน (ชื่อชนกันง่าย)</li>
+  <li><b>Two-level</b> = แต่ละคนมีลิ้นชักของตัวเอง (MFD = ตู้รวม, UFD = ลิ้นชักของแต่ละคน)</li>
+  <li><b>Tree</b> = โฟลเดอร์ซ้อนโฟลเดอร์ได้ไม่จำกัด (แบบที่เราใช้ใน Windows/Mac)</li>
+  <li><b>Acyclic graph</b> = tree ที่ให้<b>แชร์</b>ไฟล์/โฟลเดอร์เดียวกันได้จากหลายที่ (เหมือน shortcut) แต่ห้ามวน</li>
+  <li><b>General graph</b> = ลิงก์วนกลับได้ (มี cycle) จึงต้องระวังการค้นหาวนไม่จบ</li>
+</ol>
+<p><b>Path</b> = เส้นทางไปหาไฟล์: <b>absolute</b> เริ่มจาก root เสมอ (เช่น <code>/root/spell/mail/prt/first</code>) ส่วน <b>relative</b> เริ่มจากโฟลเดอร์ที่เรากำลังอยู่ (ถ้าอยู่ <code>/root/spell/mail</code> → <code>prt/first</code>)</p>
 </div>
 <table class="t left">
   <tr><th>แบบ</th><th>ลักษณะ</th><th>ข้อจำกัด / จุดสำคัญ</th></tr>
@@ -94,6 +139,22 @@
   <li><b>วิธีควบคุม</b>: Naming, Password, <b>Access list</b> (ระบุรายคน ถ้าจะให้ทุกคนอ่านได้ต้องใส่ชื่อทุกคน ซึ่งยุ่งยาก) และ <b>Access group</b> แก้ปัญหานี้ด้วยการแบ่งกลุ่มเป็น <b>owner / group / universe</b></li>
 </ul>
 <div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: แชร์ไฟล์ใน Google Drive (อาจารย์ยกตัวอย่างนี้เอง)</span>เจ้าของ (owner) ทำได้ทุกอย่าง, คนที่เราแชร์ให้ (group) อาจแก้ได้หรือดูได้อย่างเดียว, คนทั่วไปที่มีลิงก์ (others) อาจดูได้หรือเข้าไม่ได้เลย Unix/Linux ทำแบบเดียวกันด้วย 3 บิตต่อกลุ่ม</div>
+<div class="learn">
+<h4>🤔 rwx คืออะไร</h4>
+<p>ระบบ Unix/Linux กำหนดสิทธิ์ของไฟล์เป็น <b>3 กลุ่มผู้ใช้</b> × <b>3 สิทธิ์</b></p>
+<ul>
+  <li>กลุ่มผู้ใช้: <b>owner</b> (เจ้าของไฟล์) · <b>group</b> (กลุ่มที่เจ้าของกำหนด) · <b>others</b> (คนอื่นทั้งหมด หรือ universe ในชีท)</li>
+  <li>สิทธิ์: <b>r</b> = read อ่าน · <b>w</b> = write เขียน/แก้ · <b>x</b> = execute รัน</li>
+  <li>แต่ละสิทธิ์คือ <b>1 บิต</b> (มี = 1, ไม่มี = 0) กลุ่มหนึ่งจึงใช้ <b>3 บิต</b> และทั้งไฟล์ใช้ 9 บิต</li>
+</ul>
+<h4>⚙️ แปลงเป็นเลข 3 หลักทีละขั้น (ตัวอย่าง rwxr-xr--)</h4>
+<ol>
+  <li>แบ่งเป็น 3 กลุ่ม กลุ่มละ 3 ตัว: <code>rwx</code> | <code>r-x</code> | <code>r--</code></li>
+  <li>เปลี่ยนเป็นบิต (มี = 1, ขีด = 0): <code>111</code> | <code>101</code> | <code>100</code></li>
+  <li>แปลงแต่ละกลุ่มเป็นเลข (r = 4, w = 2, x = 1): 4+2+1 = 7 | 4+0+1 = 5 | 4+0+0 = 4</li>
+  <li>เอามาเรียงกัน → <b>754</b> (คำสั่ง <code>chmod 754 ไฟล์</code>)</li>
+</ol>
+</div>
 <pre>r = 4 (อ่าน)   w = 2 (เขียน)   x = 1 (execute)
 แต่ละกลุ่มรวมเลขกัน → ได้เลข 3 หลัก: owner | group | others
 
@@ -116,6 +177,23 @@ chmod 750 file  → rwx r-x ---</pre>
   <figure class="slide" data-src="clip" data-img="fsm-paint-start.jpg" data-fig="อาจารย์เริ่มวาด: state ใน secured set" data-t="1640"></figure>
   <figure class="slide" data-src="clip" data-img="fsm-paint.jpg" data-fig="ภาพสุดท้าย: transition ที่หลุดไป non-secure (สีแดง)" data-t="1694"></figure>
 </div>
+<div class="learn">
+<h4>🤔 State machine (finite state machine / automata) คืออะไร</h4>
+<p>คือแบบจำลองของระบบที่ "<b>ตอนนี้อยู่ในสถานะหนึ่ง</b>" แล้วจะ<b>เปลี่ยนสถานะ</b>เมื่อเกิดเหตุการณ์ (input) ประกอบด้วย:</p>
+<ul>
+  <li><b>State (สถานะ)</b> = วงกลม เช่น S0, S1, S2</li>
+  <li><b>Input / event</b> = สิ่งที่เกิดขึ้น เช่น a, b</li>
+  <li><b>Transition</b> = ลูกศรที่บอกว่า "อยู่ที่ state นี้ แล้วเกิด input นี้ จะไปที่ state ไหน" เช่น <code>S0 -a-> S1</code></li>
+</ul>
+<h4>🔍 ตัวอย่างใกล้ตัว: ไฟจราจร</h4>
+<p>state = {แดง, เขียว, เหลือง}, input = "หมดเวลา" → แดง -หมดเวลา-> เขียว -หมดเวลา-> เหลือง -หมดเวลา-> แดง วนอยู่แค่ 3 state นี้ ถ้าวันหนึ่งไฟเสียแล้วกลายเป็น "เขียวทั้งสองทาง" ก็คือหลุดไป state อันตราย</p>
+<h4>⚙️ ใช้นิยามความปลอดภัยยังไง</h4>
+<ol>
+  <li>แบ่ง state เป็น <b>secure set</b> (สถานะที่ปลอดภัย) กับ <b>non-secure</b></li>
+  <li>ระบบ <b>secure</b> เมื่อ<b>ทุก transition</b>ที่ออกจาก secure state พาไปได้แค่ secure state ไม่ว่า input จะเป็นอะไร ระบบจึงวนอยู่ใน secure set เสมอ</li>
+  <li>ถ้ามี transition ใดพาออกไป non-secure (เช่น ช่องโหว่ / trojan / backdoor) ระบบไม่ secure และวิธีแก้คือ<b>ปิด transition นั้น</b> (patch)</li>
+</ol>
+</div>
 <div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: ห้องในบ้านที่ปิดประตูหมด</span>
 state = ห้อง, transition = ประตูที่เปิดเมื่อเกิดเหตุการณ์ (input a, b) ระบบจะ <b>secure</b> ก็ต่อเมื่อประตูทุกบานจากห้องที่ปลอดภัยพาไปได้แค่ห้องที่ปลอดภัย
 <br>ถ้ามีประตูลับ (ช่องโหว่ / backdoor / trojan) ที่พาออกไปนอกบ้านได้ ระบบก็ไม่ secure และวิธีแก้คือ<b>ปิดประตูนั้น (patch)</b></div>
@@ -130,6 +208,16 @@ state = ห้อง, transition = ประตูที่เปิดเมื
 <div class="slides">
   <figure class="slide" data-src="file" data-page="11" data-img="file-p11.jpg" data-fig="รูปที่ 4.2.A protection domains"></figure>
   <figure class="slide" data-src="file" data-page="12" data-img="file-p12.jpg" data-fig="รูปที่ 4.2.B access matrix, 4.2.C dynamic (switch)"></figure>
+</div>
+<div class="learn">
+<h4>🤔 Domain และ access matrix คืออะไร</h4>
+<ul>
+  <li><b>Object</b> = สิ่งที่ต้องป้องกัน ทั้งฮาร์ดแวร์ (CPU, printer, disk) และซอฟต์แวร์ (file, program, semaphore)</li>
+  <li><b>Access right</b> = การกระทำที่ทำกับ object ได้ เช่น read, write, execute, print</li>
+  <li><b>Domain</b> = <b>ชุดของสิทธิ์</b> หรือ "บทบาท" เช่น domain ของนักศึกษา กับ domain ของแอดมิน ซึ่งเขียนเป็นคู่ &lt;object, สิทธิ์&gt; ส่วน process ทำงานอยู่ใน domain ใดก็ได้สิทธิ์ของ domain นั้น</li>
+  <li><b>Access matrix</b> = ตารางรวมทุกอย่าง: <b>แถว = domain, คอลัมน์ = object</b> ช่องที่ตัดกันคือสิทธิ์ เช่น ช่อง (D3, F3) = execute แปลว่า process ใน D3 รัน F3 ได้</li>
+  <li><b>Switch</b> (dynamic protection) = เปลี่ยนไปอยู่อีก domain ได้ (คล้ายการใช้ <code>sudo</code> หรือสลับบัญชี) แล้วได้สิทธิ์ของ domain ใหม่</li>
+</ul>
 </div>
 <ul>
   <li><b>Object</b>: hardware (CPU, printer, disk, memory segment, tape drive) และ software (file, program, semaphore)</li>

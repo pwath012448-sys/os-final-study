@@ -187,3 +187,16 @@ svg text { font-family: var(--sans); }
 
 /* iPad / touch */
 @media (hover: none) { button.b, .seg button, .q .opt { min-height: 38px; } table.m td input { width: 48px; min-height: 32px; } }
+
+/* กล่องสอนแบบไม่รู้มาก่อน */
+.learn { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 12px 18px; margin: 14px 0; }
+.learn h4 { margin: 1em 0 .25em; font-size: 1rem; color: #233c99; }
+.learn h4:first-child { margin-top: .2em; }
+.learn ol, .learn ul { margin: .3em 0 .6em; padding-left: 1.4em; }
+.learn p { margin: .3em 0 .6em; }
+.gotit { background: #fffdf3; border: 1px dashed #e2c46b; border-radius: var(--radius); padding: 8px 14px; margin: 10px 0 18px; }
+.gotit > .t { font-weight: 700; color: #8a6300; }
+table.gloss td:first-child { white-space: nowrap; font-weight: 600; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0; }
+.flow span { background: var(--accent-soft); border: 1px solid #cdd8f7; border-radius: 8px; padding: 3px 10px; font-size: .92rem; }
+.flow i { color: var(--muted); font-style: normal; }

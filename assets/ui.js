@@ -4,6 +4,7 @@
 
   const PAGES = [
     ["index.html", "หน้าแรก"],
+    ["basics.html", "0 ปูพื้นฐาน"],
     ["deadlock.html", "1 Deadlock"],
     ["memory.html", "2 Memory"],
     ["vm.html", "3 Virtual Memory ★"],

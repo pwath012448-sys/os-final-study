@@ -27,26 +27,75 @@
 <div class="slides">
   <figure class="slide" data-src="vm" data-page="1" data-img="vm-p01.jpg" data-fig="รูปที่ 3.2.A ภาพรวม virtual memory" data-t="1036"></figure>
 </div>
-<div class="box idea"><span class="t">💡 เข้าใจง่ายๆ: โต๊ะเรียนกับชั้นหนังสือ</span>
-โต๊ะ (= <b>RAM</b>) วางหนังสือได้ไม่กี่หน้า ส่วนชั้นหนังสือ (= <b>ดิสก์ / backing store</b>) เก็บได้ทั้งเล่ม เราเปิดอ่านเฉพาะหน้าที่ต้องใช้วางบนโต๊ะ พอโต๊ะเต็มก็เก็บบางหน้ากลับชั้นแล้วหยิบหน้าใหม่มาแทน
-<br>ผลคือเราเหมือนมีโต๊ะใหญ่เท่าทั้งเล่ม นี่คือ <b>virtual memory</b></div>
+<div class="learn">
+<h4>🤔 คืออะไร</h4>
+<p><b>Virtual memory</b> = เทคนิคที่ทำให้โปรแกรม<b>เห็นหน่วยความจำใหญ่กว่า RAM จริง</b> โดยเก็บบาง page ไว้ใน RAM และที่เหลือพักไว้บน<b>ดิสก์ (backing store)</b> ส่วน page table (ในชีทเรียกว่า <b>memory map</b>) จดว่า page ไหนอยู่ใน RAM หรืออยู่บนดิสก์</p>
+<h4>❓ ทำไมต้องมี</h4>
 <ul>
-  <li><b>Virtual memory</b> = ทำให้ผู้ใช้มองเห็นหน่วยความจำ (logical memory) ใหญ่กว่าหน่วยความจำจริง โดยใช้ <b>ดิสก์</b> กับ <b>memory map</b> ช่วย</li>
-  <li>เหตุผล: physical memory มีจำกัด ส่วนเทคนิค overlay หรือ dynamic loading ก็ยังมีข้อจำกัดอยู่</li>
+  <li>RAM มีจำกัด แต่โปรแกรมใหญ่ขึ้นเรื่อยๆ และต้องรันหลายโปรแกรมพร้อมกัน</li>
+  <li>overlay กับ dynamic loading ก็ยังมีข้อจำกัด (overlay ต้องให้คนเขียนโปรแกรมแบ่งเอง)</li>
+  <li>โปรแกรม<b>ไม่ได้ใช้ทุกส่วนพร้อมกัน</b> ช่วงหนึ่งใช้แค่บางส่วน (เรียกว่า locality) จึงไม่จำเป็นต้องให้ทั้งโปรแกรมอยู่ใน RAM</li>
 </ul>
+<h4>⚙️ ทำงานยังไง (ต่อยอดจาก paging ในบทที่ 2)</h4>
+<ol>
+  <li>โปรแกรมถูกแบ่งเป็น page เหมือน paging ปกติ</li>
+  <li>ไม่ต้องโหลดทุก page เข้า RAM โหลด<b>เฉพาะ page ที่ต้องใช้</b> ที่เหลืออยู่บนดิสก์</li>
+  <li>page table บอกว่า page ไหนอยู่ใน RAM (frame ไหน) และ page ไหนยังอยู่บนดิสก์</li>
+  <li>ถ้าโปรแกรมอ้าง page ที่ยังอยู่บนดิสก์ → OS ไปโหลดมาให้ (page fault ในหัวข้อ 3.3) ถ้า RAM เต็มก็เลือก page เก่าออก (page replacement ในหัวข้อ 3.5)</li>
+</ol>
+<h4>💡 เทียบให้เห็นภาพ: โต๊ะเรียนกับชั้นหนังสือ</h4>
+<p>โต๊ะ (= <b>RAM</b>) วางหนังสือได้ไม่กี่หน้า ส่วนชั้นหนังสือ (= <b>ดิสก์</b>) เก็บได้ทั้งเล่ม เราวางบนโต๊ะเฉพาะหน้าที่กำลังอ่าน พอโต๊ะเต็มก็เก็บบางหน้ากลับชั้นแล้วหยิบหน้าใหม่มาแทน ผลคือเหมือนมีโต๊ะใหญ่เท่าทั้งเล่ม</p>
+</div>
 
 <h2>3.2 Demand paging และ valid–invalid bit ★</h2>
-<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>สมมุติทีละ 3 frame … ถูกโยนไปในฮาร์ด ที่ยังไม่อยู่ในเมมโมรีก็จะเป็น invalid</q> <button class="ts" data-ts="1085"></button></div>
+<div class="learn">
+<h4>🤔 Demand paging คืออะไร</h4>
+<p>= "<b>โหลดเมื่อต้องใช้</b>" (demand = ความต้องการ) ตอนเริ่มรันไม่ต้องโหลดทุก page ให้โหลดทีละ page ตอนที่โปรแกรมอ้างถึงครั้งแรก ทำให้เริ่มโปรแกรมได้เร็วและประหยัด RAM</p>
+<h4>🤔 Valid–invalid bit คืออะไร</h4>
+<p>ในแต่ละช่องของ page table จะมีบิตเพิ่มมา 1 ตัว บอกว่าตอนนี้ page นั้นอยู่ใน RAM หรือไม่</p>
+<ul>
+  <li><b>v (valid)</b> = อยู่ใน RAM แล้ว ช่องนั้นมีเลข frame ให้ใช้ได้เลย</li>
+  <li><b>i (invalid)</b> = <b>ไม่อยู่ใน RAM</b> (ยังอยู่บนดิสก์) ถ้าอ้างถึงจะเกิด <b>page fault</b></li>
+</ul>
+<h4>🔍 อ่านรูป 3.2.C</h4>
+<pre>page  frame  bit    ความหมาย
+0 (A)   4     v     A อยู่ใน RAM ที่ frame 4
+1 (B)   -     i     B อยู่บนดิสก์ → อ้างแล้ว page fault
+2 (C)   6     v     C อยู่ที่ frame 6
+3 (D)   -     i
+4 (E)   -     i
+5 (F)   9     v     F อยู่ที่ frame 9
+6 (G)   -     i
+7 (H)   -     i</pre>
+</div>
 <div class="slides">
   <figure class="slide" data-src="vm" data-page="2" data-img="vm-p02.jpg" data-fig="รูปที่ 3.2.B swapping, 3.2.C valid-invalid" data-t="1110"></figure>
 </div>
-<ul>
-  <li><b>Demand paging</b> = โหลดเพจเข้าหน่วยความจำ<b>เฉพาะตอนที่ต้องใช้</b> (ใช้ swapping ช่วย)</li>
-  <li>page table มีบิต <b>v (valid)</b> = เพจอยู่ในหน่วยความจำจริง และ <b>i (invalid)</b> = ไม่อยู่ (อยู่ในดิสก์)</li>
-  <li>รูป 3.2.C: A → เฟรม 4, C → 6, F → 9 เป็น v ส่วน B, D, E, G, H เป็น i ถ้าอ้างถึงจะเกิด <b>page fault</b></li>
-</ul>
+<div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>สมมุติทีละ 3 frame … ถูกโยนไปในฮาร์ด ที่ยังไม่อยู่ในเมมโมรีก็จะเป็น invalid</q> <button class="ts" data-ts="1085"></button></div>
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">ตามรูป 3.2.C ถ้าโปรแกรมอ้างข้อมูล D (page 3) จะเกิดอะไร</div><div class="opts">
+    <button class="opt">อ่านจาก frame 3 ได้เลย</button><button class="opt">page fault เพราะ bit เป็น i</button><button class="opt">โปรแกรมหยุดทำงานถาวร</button></div>
+    <div class="fb">bit = i แปลว่า page นี้ไม่อยู่ใน RAM ต้องไปโหลดจากดิสก์ก่อน (ไม่ใช่ error ของโปรแกรม)</div></div>
+</div></div>
 
 <h2>3.3 ขั้นตอนเมื่อเกิด page fault ★</h2>
+<div class="learn">
+<h4>🤔 Page fault คืออะไร</h4>
+<p>คือเหตุการณ์ที่โปรแกรม<b>อ้าง page ที่ไม่อยู่ใน RAM</b> (bit = i) ซึ่ง<b>ไม่ใช่ error</b> แต่เป็นสัญญาณให้ OS ไปโหลด page นั้นมาให้ แล้วโปรแกรมก็ทำต่อได้ตามปกติ</p>
+<h4>💡 เทียบให้เห็นภาพ: ห้องสมุด</h4>
+<p>เราขอหนังสือเล่มหนึ่ง บรรณารักษ์ดูสมุดรายการแล้วพบว่าไม่ได้วางอยู่บนชั้นหน้าร้าน (invalid) จึงเดินไปหยิบจากคลังหลังร้าน (ดิสก์) มาวางบนชั้นว่าง แก้สมุดรายการว่าตอนนี้อยู่ชั้นไหน แล้วยื่นให้เรา</p>
+<h4>⚙️ แต่ละขั้นทำอะไร (รูป 3.2.D)</h4>
+<ol>
+  <li><b>Reference</b> — CPU รันคำสั่งที่อ้าง page นั้น (เช่น <code>load M</code>)</li>
+  <li><b>Trap</b> — ฮาร์ดแวร์เห็นว่า bit = i จึงหยุดคำสั่งแล้วส่งเรื่องให้ OS (trap = ขัดจังหวะไปหา OS)</li>
+  <li><b>Page is on backing store</b> — OS ตรวจว่าเป็นการอ้างที่ถูกต้อง แล้วหาว่า page อยู่ตรงไหนบนดิสก์</li>
+  <li><b>Bring in missing page</b> — หา <b>free frame</b> แล้วโหลด page จากดิสก์มาใส่ (ถ้าไม่มี frame ว่าง ต้องใช้ page replacement ในหัวข้อ 3.5 เลือก page ออกก่อน)</li>
+  <li><b>Reset page table</b> — เขียนเลข frame ใหม่ลง page table และเปลี่ยน bit เป็น <b>v</b></li>
+  <li><b>Restart instruction</b> — สั่งคำสั่งเดิมใหม่อีกครั้ง คราวนี้ bit = v จึงอ่านได้ปกติ</li>
+</ol>
+<p>เพราะการอ่านดิสก์ช้ามาก (ช้ากว่า RAM เป็นแสนเท่า) <b>ยิ่ง page fault น้อย ระบบยิ่งเร็ว</b> นี่คือเหตุผลที่อาจารย์เน้นการคำนวณ page fault rate</p>
+</div>
 <div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>เกิด page fault OS จะดัก แล้วก็ทำการสั่ง เพราะว่า OS เป็นคนจัดการ virtual memory ก็ต้องรู้ว่าตำแหน่งจริงมันอยู่ที่ไหน ก็จะบอกว่าให้ไปโหลดตำแหน่งจริงมา แล้วมาเก็บใน RAM ใหม่ แล้ว loop ถัดมา CPU จะพยายาม request ใหม่ ก็จะไม่ fault แล้ว จะเป็น valid</q> <button class="ts" data-ts="1260"></button></div>
 <div class="slides">
   <figure class="slide" data-src="vm" data-page="3" data-img="vm-p03.jpg" data-fig="รูปที่ 3.2.D การจัดการ page fault" data-t="1256"></figure>
@@ -63,11 +112,49 @@
 <div class="slides">
   <figure class="slide" data-src="vm" data-page="4" data-img="vm-p04.jpg" data-fig="3.2.2 reference string + FIFO (รูป 3.2.E)" data-t="1298"></figure>
 </div>
-<p>คือลำดับ<b>หมายเลขเพจ</b>ที่ถูกอ้าง ถ้าโจทย์ให้มาเป็น address ให้แปลงก่อน: page = address div ขนาดเพจ แล้ว<b>ยุบตัวที่ซ้ำติดกัน</b> (อ้างเพจเดิมซ้ำทันทีไม่มีทาง fault)</p>
+<div class="learn">
+<h4>🤔 คืออะไร</h4>
+<p><b>Reference string</b> = ลำดับ<b>หมายเลข page</b> ที่โปรแกรมอ้างถึงตามเวลา เช่น <code>7 0 1 2 0 3 …</code> แปลว่า อ้าง page 7 ก่อน แล้ว page 0 แล้ว page 1 …</p>
+<h4>❓ ทำไมต้องมี</h4>
+<p>เพื่อใช้<b>จำลอง</b>ว่าแต่ละอัลกอริทึม page replacement จะเกิด fault กี่ครั้ง โดยไม่ต้องสนใจ address ละเอียด สนใจแค่ว่าอ้าง page ไหน</p>
+<h4>⚙️ ถ้าโจทย์ให้มาเป็น address (ตัวอย่างในชีท: 100 byte/page)</h4>
+<ol>
+  <li>หาเลข page ของแต่ละ address: page = address div 100 เช่น 0432 → 4, 0612 → 6</li>
+  <li><b>ยุบตัวที่ซ้ำติดกัน</b> เพราะถ้าอ้าง page เดิมซ้ำทันที page นั้นอยู่ใน RAM แน่นอน ไม่มีทาง fault</li>
+</ol>
+<pre>address : 0100 0432 0101 0612 0102 0103 0104 0101 0611 0102 0103
+page    :   1    4    1    6    1    1    1    1    6    1    1
+ยุบซ้ำ   :   1    4    1    6    1                   6    1
+reference string = 1, 4, 1, 6, 1, 6, 1</pre>
+</div>
 <div data-widget="addr2ref"></div>
 
 <h2>3.5 Page replacement ★★★</h2>
-<p>เมื่อเกิด page fault แล้ว<b>เฟรมเต็ม</b> ต้องเลือกเพจหนึ่งออก (victim) อัลกอริทึมต่างกันแค่ "<b>เลือกใครออก</b>"</p>
+<div class="learn">
+<h4>🤔 คืออะไร</h4>
+<p>process แต่ละตัวได้ <b>frame</b> (ช่องใน RAM) จำนวนจำกัด เช่น 3 frames ถ้าเกิด page fault ตอนที่ frame <b>เต็มแล้ว</b> ต้องเลือก page หนึ่งในนั้นออก (เรียกว่า <b>victim</b>) เพื่อเอา page ใหม่เข้ามาแทน <b>Page replacement algorithm</b> คือกติกาการเลือก victim</p>
+<h4>❓ ทำไมสำคัญ</h4>
+<p>ถ้าเลือกผิด (เอา page ที่จะใช้อีกเร็วๆ นี้ออก) ก็จะ fault บ่อย ระบบช้า เป้าหมายจึงเป็น <b>page fault ให้น้อยที่สุด</b></p>
+<h4>⚙️ อ่าน/เขียนตารางแบบชีทยังไง</h4>
+<ul>
+  <li>แถวบนสุด = reference string (การอ้างแต่ละครั้งเรียงตามเวลา)</li>
+  <li>แถว F1, F2, F3 = ข้างในแต่ละ frame <b>หลังจาก</b>อ้างครั้งนั้นแล้ว</li>
+  <li>ใต้คอลัมน์: <b>F</b> = page fault (page ไม่อยู่ใน frame ต้องโหลด) ส่วนช่องว่าง = <b>hit</b> (อยู่แล้ว)</li>
+  <li>ตอนเริ่ม frame ว่าง การอ้างครั้งแรกๆ จึงเป็น fault แล้วใส่ลงช่องว่างได้เลย การเลือก victim เกิดเฉพาะตอน frame เต็มแล้ว</li>
+</ul>
+<h4>🔍 เห็นความต่างใน 1 ตัวอย่าง: 3 frames, reference string <code>1 2 3 1 4 3 2</code></h4>
+<p>อ้าง 1, 2, 3 → fault ทั้งสามครั้ง ใส่ลงช่องว่าง · อ้าง 1 → hit · อ้าง <b>4</b> → fault และ frame เต็ม (มี 1, 2, 3) <b>จะเอาใครออก?</b></p>
+<table class="t left">
+  <tr><th>อัลกอริทึม</th><th>คิดยังไง</th><th>เอาออก</th></tr>
+  <tr><td>FIFO</td><td>1 เข้ามาก่อนสุด (ตำแหน่งที่ 1)</td><td><b>1</b></td></tr>
+  <tr><td>OPT</td><td>มองอนาคต: 3 ใช้อีกที่ตำแหน่ง 6, 2 ใช้อีกที่ 7, ส่วน 1 ไม่ใช้อีกเลย</td><td><b>1</b></td></tr>
+  <tr><td>LRU</td><td>มองอดีต: 1 เพิ่งใช้ที่ตำแหน่ง 4, 3 ใช้ที่ 3, 2 ใช้ที่ 2 → 2 ไม่ได้ใช้นานสุด</td><td><b>2</b></td></tr>
+  <tr><td>LFU</td><td>นับครั้ง: 1 = 2 ครั้ง, 2 = 1, 3 = 1 → น้อยสุดเสมอกัน (2 กับ 3) ใช้ FIFO: 2 เข้ามาก่อน</td><td><b>2</b></td></tr>
+  <tr><td>MFU</td><td>นับครั้ง: 1 = 2 ครั้ง มากที่สุด</td><td><b>1</b></td></tr>
+</table>
+<p>สังเกตว่า <b>FIFO สนใจแค่ใครเข้ามาก่อน</b> ไม่สนว่า 1 เพิ่งถูกใช้ ส่วน <b>LRU</b> เห็นว่า 1 เพิ่งถูกใช้จึงเก็บไว้</p>
+</div>
+<p>สรุปคือเมื่อเกิด page fault แล้ว<b>เฟรมเต็ม</b> ต้องเลือกเพจหนึ่งออก (victim) อัลกอริทึมต่างกันแค่ "<b>เลือกใครออก</b>"</p>
 <div class="box trap"><span class="t">⚠️ กติกาที่ชีทใช้ (ต้องทำตามในข้อสอบ)</span>
 1) เฟรมว่างตอนเริ่ม: เพจแรกๆ ที่เข้ามาก็<b>นับเป็น page fault</b>
 <br>2) ถ้ามีเพจที่เข้าเงื่อนไขให้เอาออกมากกว่า 1 เพจ → <b>ใช้ FIFO ตัดสิน</b> (เอาตัวที่เข้ามาก่อนออก)
@@ -131,6 +218,12 @@
   Belady 4 เฟรม   = 10/12 = 83.3%</pre>
 
 <h2>3.7 Belady's anomaly ★</h2>
+<div class="learn">
+<h4>🤔 คืออะไร</h4>
+<p>ปกติเราคาดว่า<b>ให้ frame มากขึ้น → fault น้อยลง</b> (โต๊ะใหญ่ขึ้น ก็ไม่ต้องเดินไปหยิบหนังสือบ่อย) แต่ <b>Belady's anomaly</b> คือกรณีแปลกที่<b>เพิ่ม frame แล้ว fault กลับเพิ่มขึ้น</b> ซึ่งเกิดกับ <b>FIFO</b></p>
+<h4>❓ ทำไมเกิดกับ FIFO</h4>
+<p>FIFO เลือก victim จาก "ใครเข้ามาก่อน" ซึ่งไม่เกี่ยวกับว่า page ไหนกำลังถูกใช้ พอจำนวน frame เปลี่ยน ลำดับคิวก็เปลี่ยนไปทั้งชุด บางครั้งจึงไล่ page ที่กำลังจะถูกใช้ออกพอดี ส่วน LRU กับ OPT เลือกจากการใช้งานจริง (อดีต/อนาคต) จึงไม่เกิด</p>
+</div>
 <p><b>Belady's anomaly</b> = <b>เพิ่มจำนวนเฟรมแล้ว page fault กลับเพิ่มขึ้น</b> แทนที่จะลดลง ซึ่งเกิดกับ <b>FIFO</b></p>
 <p>ตัวอย่างชีท: <code>1 2 3 4 1 2 5 1 2 3 4 5</code> ใช้ 3 เฟรม = <b>9</b> faults แต่ 4 เฟรม = <b>10</b> faults (รูป 3.2.F, 3.2.G)</p>
 <div class="slides">
