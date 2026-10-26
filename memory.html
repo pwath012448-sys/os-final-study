@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>2 Memory Management — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261027">
 </head>
 <body>
 <div class="wrap">
@@ -184,6 +184,10 @@ MMU แปลงโดย physical = relocation(base) register + logical
 <div class="box trap"><span class="t">⚠️ อาจารย์เตือน</span>อย่าดูแค่ตำแหน่งบน/ล่างในรูป <b>ให้ดูเลข address</b> เพราะบางรูปเขียน 0 ไว้ด้านล่าง</div>
 <div class="box prof"><span class="t">🗣 อาจารย์พูด</span><q>คำว่า low และ high address บางทีมันจะเขียน low อยู่ข้างเลข … เราต้องดูเลขนะ บางทีเลขส่วนอยู่ข้างล่าง … low memory OS จะอยู่ที่เลข 0 … หรือบางทีเขาออกแบบมาเป็นแบบให้พื้นที่ว่างตรงกลางก็ได้ ก็จะเกี่ยวข้องกับเรื่อง stack กับ heap</q> <button class="ts" data-ts="461"></button></div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">แบบ high memory ส่วนของ user process อยู่ตรงไหน</div><div class="opts"><button class="opt">ต่อจาก OS ทันที</button><button class="opt">ท้ายสุด (address สูง)</button><button class="opt">ก่อน OS (address ต่ำกว่า 0)</button></div><div class="fb">high memory: OS อยู่ที่ 0 ส่วน user ไปอยู่ท้ายสุด ที่ว่างจึงอยู่ตรงกลาง</div></div>
+</div></div>
 <h2>2.6 Multiple partition + RR (ตัวอย่าง 3.1.ก)</h2>
 <div class="learn">
 <h4>🤔 คืออะไร</h4>
@@ -211,6 +215,10 @@ MMU แปลงโดย physical = relocation(base) register + logical
 <p>เลื่อนดูหน่วยความจำเปลี่ยนทีละเหตุการณ์:</p>
 <div data-widget="rrmem"></div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">ในตัวอย่าง 3.1.ก ทำไม P4 (700K) จึงต้องรอตั้งแต่เริ่ม</div><div class="opts"><button class="opt">เพราะ RR ยังไม่ถึงคิว P4</button><button class="opt">เพราะใส่ P1, P2, P3 แล้วเหลือที่ว่างแค่ 260K</button><button class="opt">เพราะ P4 ใหญ่กว่าหน่วยความจำทั้งหมด</button></div><div class="fb">2160K − (600 + 1000 + 300) = 260K &lt; 700K จึงต้องรอจน P2 จบที่เวลา 14 แล้วค่อยลง 1000–1700K</div></div>
+</div></div>
 <h2>2.7 Placement strategy: first / best / worst fit ★</h2>
 <div class="learn">
 <h4>🤔 คืออะไร</h4>
@@ -369,8 +377,8 @@ physical      = 000110 | 0111011110  = 6×1024 + 478 = 6622</pre>
 <div class="nextprev"><a href="deadlock.html">← บทที่ 1 Deadlock</a><a class="r" href="vm.html">บทที่ 3 Virtual Memory ★ →</a></div>
 </main>
 </div>
-<script src="assets/core.js"></script>
-<script src="assets/ui.js"></script>
-<script src="assets/widgets.js"></script>
+<script src="assets/core.js?v=20261027"></script>
+<script src="assets/ui.js?v=20261027"></script>
+<script src="assets/widgets.js?v=20261027"></script>
 </body>
 </html>

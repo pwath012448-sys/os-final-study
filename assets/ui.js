@@ -30,6 +30,7 @@
     hw2ans: { name: "งานที่ส่งไป (ไฟล์ในโฟลเดอร์ ass)", file: null },
   };
 
+  const VERSION = "27 ต.ค. 2026";
   const UI = {};
   window.UI = UI;
   // เปิดจากไฟล์ในเครื่อง/วง LAN = มีคลิปและ PDF ให้ใช้, เปิดจากเว็บสาธารณะ = ไม่มี (ไม่ได้อัปโหลด)
@@ -62,7 +63,7 @@
     const nav = UI.el("nav", null, PAGES.map(([href, label]) =>
       UI.el("a", { href, class: href === cur ? "on" : null, html: label.replace("★", '<span class="star">★</span>') })));
     const bar = UI.el("div", { class: "topbar" }, UI.el("div", { class: "in" },
-      UI.el("a", { class: "brand", href: "index.html" }, "OS Final"), nav));
+      UI.el("a", { class: "brand", href: "index.html" }, "OS Final"), nav, UI.el("span", { class: "ver", title: "ถ้าวันที่นี้เก่า ให้กดรีเฟรช" }, "อัปเดต " + VERSION)));
     document.body.prepend(bar);
   }
 

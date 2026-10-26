@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>5 File System &amp; Protection — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261027">
 </head>
 <body>
 <div class="wrap">
@@ -56,6 +56,10 @@ Database : หลายไฟล์ที่เชื่อมกัน (ไฟ�
 </div>
 <p><b>File operations</b>: create, write, read, delete, reset (ชี้กลับต้นไฟล์) + open, close, seek, attribute, rename, append</p>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="2"><div class="qt">ชั้นไหนของ layered file system ที่มี device driver และติดต่อกับฮาร์ดแวร์โดยตรง</div><div class="opts"><button class="opt">Application programs</button><button class="opt">Logical file system</button><button class="opt">I/O control</button></div><div class="fb">I/O control คือชั้นล่างสุด (ชั้นที่ 1) มี device driver และ interrupt handler</div></div>
+</div></div>
 <h2>5.2 Access methods</h2>
 <div class="slides">
   <figure class="slide" data-src="file" data-page="3" data-img="file-p03.jpg" data-fig="รูปที่ 4.1.C sequential, 4.1.D sequential บน direct"></figure>
@@ -76,6 +80,10 @@ Database : หลายไฟล์ที่เชื่อมกัน (ไฟ�
   <li><b>ISAM</b>: master index (binary search) → secondary index (binary search) → actual file block (อ่านแบบ sequential)</li>
 </ul>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">กระโดดไปอ่านข้อมูลบล็อกที่ 50 ของไฟล์ได้ทันทีโดยไม่ผ่านบล็อก 0–49 คือ access แบบใด</div><div class="opts"><button class="opt">Sequential access</button><button class="opt">Direct access</button><button class="opt">ไม่มีแบบไหนทำได้</button></div><div class="fb">direct access ทำงานแบบดิสก์ ทุกบล็อกมีเลข จึงกระโดดไปได้เลย ส่วน sequential ต้องไล่ตามลำดับแบบเทป</div></div>
+</div></div>
 <h2>5.3 File property (ข้อมูลใน directory) ★</h2>
 <div class="slides">
   <figure class="slide" data-src="file" data-page="4" data-img="file-p04.jpg" data-fig="4.1.4 directory structure (file name, type, location, size, …)"></figure>
@@ -97,6 +105,10 @@ Database : หลายไฟล์ที่เชื่อมกัน (ไฟ�
 </table>
 <p><b>Directory operations</b>: search, create file, delete file, list directory, back up</p>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="3"><div class="qt">ข้อใด<b>ไม่ใช่</b> file property ที่เก็บใน directory</div><div class="opts"><button class="opt">ชื่อไฟล์และนามสกุล</button><button class="opt">ตำแหน่ง (pointer) บนดิสก์</button><button class="opt">สิทธิ์การเข้าถึง</button><button class="opt">ข้อความที่พิมพ์อยู่ในไฟล์</button></div><div class="fb">file property คือข้อมูล<b>เกี่ยวกับ</b>ไฟล์ ไม่ใช่เนื้อหาข้างในไฟล์</div></div>
+</div></div>
 <h2>5.4 โครงสร้าง directory</h2>
 <div class="slides">
   <figure class="slide" data-src="file" data-page="6" data-img="file-p06.jpg" data-fig="รูปที่ 4.1.G two-level + tree" data-t="1508"></figure>
@@ -204,6 +216,10 @@ state = ห้อง, transition = ประตูที่เปิดเมื
 ถ้า OS ผิดพลาดหรือมีช่องโหว่ (เช่น trojan ทำ backdoor) จะมี transition ไป non-secure
 ต้องปิด transition หรือเหตุการณ์ที่ trigger นั้น (patch)</pre></div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="text" data-answer="S2|s2"><div class="qt">จากเครื่องมือด้านบน (transition S0 -a-> S1, S1 -a-> S1, S1 -b-> S2, S2 -a-> S0, S2 -b-> S3) เริ่มที่ S0 แล้วป้อน a a b จะจบที่ state ใด</div><div class="ans">S0 -a-> S1 -a-> S1 -b-> <b>S2</b> (ยังอยู่ใน secure set)</div></div>
+</div></div>
 <h2>5.7 Domain of protection และ access matrix</h2>
 <div class="slides">
   <figure class="slide" data-src="file" data-page="11" data-img="file-p11.jpg" data-fig="รูปที่ 4.2.A protection domains"></figure>
@@ -238,8 +254,8 @@ state = ห้อง, transition = ประตูที่เปิดเมื
 <div class="nextprev"><a href="storage.html">← บทที่ 4 Storage</a><a class="r" href="exam.html">ข้อสอบจำลอง →</a></div>
 </main>
 </div>
-<script src="assets/core.js"></script>
-<script src="assets/ui.js"></script>
-<script src="assets/widgets.js"></script>
+<script src="assets/core.js?v=20261027"></script>
+<script src="assets/ui.js?v=20261027"></script>
+<script src="assets/widgets.js?v=20261027"></script>
 </body>
 </html>

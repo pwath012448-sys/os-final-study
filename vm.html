@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>3 Virtual Memory ★ — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261027">
 </head>
 <body>
 <div class="wrap">
@@ -47,6 +47,10 @@
 <p>โต๊ะ (= <b>RAM</b>) วางหนังสือได้ไม่กี่หน้า ส่วนชั้นหนังสือ (= <b>ดิสก์</b>) เก็บได้ทั้งเล่ม เราวางบนโต๊ะเฉพาะหน้าที่กำลังอ่าน พอโต๊ะเต็มก็เก็บบางหน้ากลับชั้นแล้วหยิบหน้าใหม่มาแทน ผลคือเหมือนมีโต๊ะใหญ่เท่าทั้งเล่ม</p>
 </div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">virtual memory ทำให้ดูเหมือนมีหน่วยความจำมากกว่า RAM ได้ด้วยการใช้อะไรช่วย</div><div class="opts"><button class="opt">cache</button><button class="opt">ดิสก์ (backing store) + page table</button><button class="opt">เพิ่ม register</button></div><div class="fb">เก็บบาง page ไว้บนดิสก์ และใช้ page table (memory map) จดว่า page ไหนอยู่ที่ไหน</div></div>
+</div></div>
 <h2>3.2 Demand paging และ valid–invalid bit ★</h2>
 <div class="learn">
 <h4>🤔 Demand paging คืออะไร</h4>
@@ -108,6 +112,11 @@
 ⑥ restart instruction       รันคำสั่งเดิมอีกครั้ง (คราวนี้ valid)</pre>
 <div class="box exam"><span class="t">📝 ท่องง่ายๆ</span><b>"อ้าง – ดัก – หา – โหลด – แก้ตาราง – รันใหม่"</b> และ <b>OS เป็นผู้จัดการ</b> page fault</div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="2"><div class="qt">ขั้นสุดท้ายของการจัดการ page fault คืออะไร</div><div class="opts"><button class="opt">trap</button><button class="opt">reset page table</button><button class="opt">restart instruction</button></div><div class="fb">หลังโหลด page และแก้ page table แล้ว ต้องรันคำสั่งเดิมซ้ำ ซึ่งคราวนี้ bit = v</div></div>
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">ถ้าเกิด page fault แต่ไม่มี free frame เหลือ OS ต้องทำอะไร</div><div class="opts"><button class="opt">ยกเลิกโปรแกรม</button><button class="opt">ใช้ page replacement เลือก page ออกก่อน</button><button class="opt">รอจนกว่าจะมี frame ว่างเอง</button></div><div class="fb">นี่คือจุดที่ต้องใช้อัลกอริทึม FIFO / OPT / LRU / LFU / MFU ในหัวข้อ 3.5</div></div>
+</div></div>
 <h2>3.4 Reference string</h2>
 <div class="slides">
   <figure class="slide" data-src="vm" data-page="4" data-img="vm-p04.jpg" data-fig="3.2.2 reference string + FIFO (รูป 3.2.E)" data-t="1298"></figure>
@@ -129,6 +138,10 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
 </div>
 <div data-widget="addr2ref"></div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="text" data-answer="2,3,2|232"><div class="qt">page size = 100 byte, address ตามลำดับ 0250, 0270, 0310, 0255 จงเขียน reference string (ตอบเช่น 1,2,3)</div><div class="ans">page = 2, 2, 3, 2 → ยุบตัวที่ซ้ำติดกัน → <b>2, 3, 2</b></div></div>
+</div></div>
 <h2>3.5 Page replacement ★★★</h2>
 <div class="learn">
 <h4>🤔 คืออะไร</h4>
@@ -154,6 +167,11 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
 </table>
 <p>สังเกตว่า <b>FIFO สนใจแค่ใครเข้ามาก่อน</b> ไม่สนว่า 1 เพิ่งถูกใช้ ส่วน <b>LRU</b> เห็นว่า 1 เพิ่งถูกใช้จึงเก็บไว้</p>
 </div>
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="0"><div class="qt">3 frames มี page 5, 7, 9 (เข้ามาตามลำดับ 5 → 7 → 9) แล้วอ้าง 5 ซ้ำ ต่อมาอ้าง 8 (fault) <b>FIFO</b> เอาอะไรออก</div><div class="opts"><button class="opt">5</button><button class="opt">7</button><button class="opt">9</button></div><div class="fb">FIFO ดูแค่ใครเข้ามาก่อน 5 เข้ามาก่อนสุด การอ้างซ้ำไม่ทำให้ลำดับเปลี่ยน</div></div>
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">สถานการณ์เดียวกัน ถ้าใช้ <b>LRU</b> จะเอาอะไรออก</div><div class="opts"><button class="opt">5</button><button class="opt">7</button><button class="opt">9</button></div><div class="fb">5 เพิ่งถูกใช้ จึงถือว่าใช้ล่าสุด ส่วนที่ไม่ได้ใช้นานสุดคือ 7</div></div>
+</div></div>
 <p>สรุปคือเมื่อเกิด page fault แล้ว<b>เฟรมเต็ม</b> ต้องเลือกเพจหนึ่งออก (victim) อัลกอริทึมต่างกันแค่ "<b>เลือกใครออก</b>"</p>
 <div class="box trap"><span class="t">⚠️ กติกาที่ชีทใช้ (ต้องทำตามในข้อสอบ)</span>
 1) เฟรมว่างตอนเริ่ม: เพจแรกๆ ที่เข้ามาก็<b>นับเป็น page fault</b>
@@ -217,6 +235,10 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
   Belady 3 เฟรม   = 9/12  = 75%   (เขียนว่า 9/(9+3): fault 9 + hit 3)
   Belady 4 เฟรม   = 10/12 = 83.3%</pre>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="num" data-answer="40"><div class="qt">reference string ยาว 20 ครั้ง เกิด page fault 8 ครั้ง page fault rate เท่ากับกี่ %</div><div class="ans">8 ÷ 20 = 0.4 = <b>40%</b></div></div>
+</div></div>
 <h2>3.7 Belady's anomaly ★</h2>
 <div class="learn">
 <h4>🤔 คืออะไร</h4>
@@ -233,6 +255,10 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
 <div class="box idea"><span class="t">💡 ทำไม LRU / OPT ไม่เกิด</span>LRU กับ OPT เป็น <b>stack algorithm</b>: เพจที่อยู่ในเฟรมตอนมี n เฟรม จะอยู่ในเฟรมตอนมี n+1 เฟรมด้วยเสมอ เพิ่มเฟรมจึงไม่มีทาง fault มากขึ้น ส่วน FIFO ไม่มีคุณสมบัตินี้ เพราะลำดับคิวเปลี่ยนไปเมื่อจำนวนเฟรมเปลี่ยน</div>
 <p>ลองเองในเครื่องมือด้านบน: เลือก preset "Belady — 3 เฟรม" แล้วเปลี่ยนเป็น 4 เฟรม</p>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">ข้อใดอธิบาย Belady's anomaly ได้ถูกต้อง</div><div class="opts"><button class="opt">LRU: เพิ่ม frame แล้ว fault ลดลง</button><button class="opt">FIFO: 3 frames ได้ 9 fault แต่ 4 frames ได้ 10 fault</button><button class="opt">OPT: fault มากที่สุด</button></div><div class="fb">เพิ่ม frame แล้ว fault กลับเพิ่ม ซึ่งเกิดกับ FIFO (ตัวอย่าง 1 2 3 4 1 2 5 1 2 3 4 5)</div></div>
+</div></div>
 <h2>3.8 ข้อดี / ข้อเสียของแต่ละอัลกอริทึม ★</h2>
 <div class="tblwrap">
 <table class="t left">
@@ -300,8 +326,8 @@ reference string = 1, 4, 1, 6, 1, 6, 1</pre>
 <div class="nextprev"><a href="memory.html">← บทที่ 2 Memory</a><a class="r" href="storage.html">บทที่ 4 Storage →</a></div>
 </main>
 </div>
-<script src="assets/core.js"></script>
-<script src="assets/ui.js"></script>
-<script src="assets/widgets.js"></script>
+<script src="assets/core.js?v=20261027"></script>
+<script src="assets/ui.js?v=20261027"></script>
+<script src="assets/widgets.js?v=20261027"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>4 Secondary Storage — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261027">
 </head>
 <body>
 <div class="wrap">
@@ -31,6 +31,10 @@
   <li>หน่วยความจำสำรอง เช่น magnetic tape, disk <span class="tag no">โครงสร้างดิสก์: track, cylinder, sector, head — ไม่ออก</span></li>
 </ul>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">ทำไมต้องมี secondary storage</div><div class="opts"><button class="opt">เพราะเร็วกว่า RAM</button><button class="opt">เพราะ RAM เล็กและเป็น volatile (ไฟดับข้อมูลหาย)</button><button class="opt">เพราะ CPU อ่านดิสก์ได้โดยตรง</button></div><div class="fb">ข้อจำกัด 2 ข้อของหน่วยความจำหลักตามชีท: พื้นที่น้อย และ volatile</div></div>
+</div></div>
 <h2>4.2 Free-space management</h2>
 <div class="slides">
   <figure class="slide" data-src="disk" data-page="2" data-img="disk-p02.jpg" data-fig="รูปที่ 3.3.B bit vector, 3.3.C linked list"></figure>
@@ -87,6 +91,11 @@
   <tr><td><b>FAT</b></td><td>start block</td><td>200 → 515 → 300 → end-of-file</td><td>แบบ linked แต่เก็บ pointer ไว้ในตาราง</td></tr>
 </table>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">วิธีวางไฟล์แบบใดที่กระโดดไปอ่านบล็อกที่ k ของไฟล์ได้ทันทีโดยไม่ต้องไล่จากบล็อกแรก</div><div class="opts"><button class="opt">Linked อย่างเดียว</button><button class="opt">Contiguous และ indexed</button><button class="opt">ไม่มีวิธีไหนทำได้</button></div><div class="fb">contiguous คำนวณได้จาก start + k ส่วน indexed ดูจาก index block ได้เลย แต่ linked ต้องไล่ตามตัวชี้ทีละบล็อก</div></div>
+  <div class="q" data-type="text" data-answer="7,3,9|739"><div class="qt">FAT: directory บอก start = 7, FAT[7] = 3, FAT[3] = 9, FAT[9] = end-of-file ไฟล์ใช้บล็อกใดบ้างตามลำดับ (ตอบเช่น 1,2,3)</div><div class="ans"><b>7 → 3 → 9</b></div></div>
+</div></div>
 <h2>4.4 Disk scheduling <span class="tag">ไม่ได้พูดในคลิป</span></h2>
 <div class="learn">
 <h4>🤔 คืออะไร</h4>
@@ -122,11 +131,15 @@
 <div data-widget="disk"></div>
 <div data-widget="gen" data-kind="disk"></div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="num" data-answer="30"><div class="qt">หัวอ่านอยู่ที่ 50 และคิวมี 30, 55 ใช้ SSTF total head movement เท่าไร</div><div class="ans">55 ใกล้กว่า (ห่าง 5) จึงไป 55 ก่อน แล้วไป 30 (ห่าง 25) → 5 + 25 = <b>30</b></div></div>
+</div></div>
 <div class="nextprev"><a href="vm.html">← บทที่ 3 Virtual Memory</a><a class="r" href="file.html">บทที่ 5 File &amp; Protection →</a></div>
 </main>
 </div>
-<script src="assets/core.js"></script>
-<script src="assets/ui.js"></script>
-<script src="assets/widgets.js"></script>
+<script src="assets/core.js?v=20261027"></script>
+<script src="assets/ui.js?v=20261027"></script>
+<script src="assets/widgets.js?v=20261027"></script>
 </body>
 </html>

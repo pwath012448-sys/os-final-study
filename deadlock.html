@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>1 Deadlock — ติว OS Final</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261027">
 </head>
 <body>
 <div class="wrap">
@@ -36,6 +36,11 @@
 <br>Deadlock เกิดตรง<b>ขั้นที่ 1</b> คือ ขอแล้วต้องรอ แต่สิ่งที่รอดันถูกถือไว้โดยคนที่รอเราอยู่เหมือนกัน</p>
 </div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">ห้องแล็บมีเครื่องพิมพ์รุ่นเดียวกัน 3 เครื่อง (ใช้เครื่องไหนก็ได้) เขียนในรูป resource ได้อย่างไร</div><div class="opts"><button class="opt">3 resource types, 1 instance</button><button class="opt">1 resource type, 3 instances</button><button class="opt">1 resource type, 1 instance</button></div><div class="fb">ของชนิดเดียวกันที่ใช้แทนกันได้ = resource type เดียว ส่วนจำนวนเครื่อง = instance</div></div>
+  <div class="q" data-type="mcq" data-answer="0"><div class="qt">deadlock เกิดขึ้นที่ขั้นไหนของการใช้ทรัพยากร</div><div class="opts"><button class="opt">Request (ขอแล้วต้องรอ)</button><button class="opt">Use (กำลังใช้)</button><button class="opt">Release (ปล่อยคืน)</button></div><div class="fb">process ขอทรัพยากรที่คนอื่นถืออยู่จึงต้องรอ ถ้าทุกคนรอกันเป็นวง ก็ค้างที่ขั้น request</div></div>
+</div></div>
 <h2>1.2 เงื่อนไขที่จำเป็น 4 ข้อ ★</h2>
 <div class="box goal"><span class="t">🎯 ต้องทำได้</span>เขียนชื่อเงื่อนไขทั้ง 4 ข้อ อธิบายแต่ละข้อ และอธิบาย <b>necessary ≠ sufficient</b> ได้</div>
 <div class="slides wide">
@@ -309,6 +314,12 @@ P2         9      2          7
 </div>
 <div class="box idea"><span class="t">💡 ทำไมชื่อ Banker</span>ธนาคารมีเงินสดจำกัด ลูกค้าแต่ละรายประกาศวงเงินสูงสุด (Max) ไว้ ธนาคารจะปล่อยกู้เพิ่มก็ต่อเมื่อมั่นใจว่ายังมีลำดับที่ทุกคนกู้ได้ครบแล้วคืนเงินได้ ถ้าปล่อยแล้วอาจมีคนติดค้างกันหมด ก็ให้รอก่อน</div>
 
+<div class="gotit"><span class="t">เกทไหม? ลองตอบ</span>
+<div class="quiz">
+  <div class="q" data-type="mcq" data-answer="0"><div class="qt">ทรัพยากรชนิดเดียวมี 10 ชิ้น P0 (Max 7, ถือ 3) และ P1 (Max 4, ถือ 2) ตอนนี้ระบบ safe หรือไม่</div><div class="opts"><button class="opt">safe เพราะมีลำดับ &lt;P1, P0&gt;</button><button class="opt">unsafe</button><button class="opt">เกิด deadlock แล้ว</button></div><div class="fb">ว่าง = 10 − 5 = 5 · P1 ต้องการอีก 2 ≤ 5 → ทำจบแล้วคืน 2 → ว่าง 7 · P0 ต้องการอีก 4 ≤ 7 → จบได้ จึง safe</div></div>
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">กติกา "ต้องขอทรัพยากรทั้งหมดก่อนเริ่มทำงาน" ทำลายเงื่อนไขใด</div><div class="opts"><button class="opt">Mutual exclusion</button><button class="opt">Hold and wait</button><button class="opt">No preemption</button><button class="opt">Circular wait</button></div><div class="fb">ถ้าได้ครบตั้งแต่แรกก็ไม่ต้องถือของไว้แล้วรอของเพิ่ม (request all resources)</div></div>
+  <div class="q" data-type="mcq" data-answer="1"><div class="qt">unsafe state เท่ากับ deadlock หรือไม่</div><div class="opts"><button class="opt">ใช่ เหมือนกันทุกประการ</button><button class="opt">ไม่ใช่ unsafe แปลว่ามีโอกาสเกิด แต่ยังไม่เกิด</button></div><div class="fb">unsafe = หา safe sequence ไม่ได้ จึงเสี่ยง แต่ deadlock อาจยังไม่เกิดจริง (deadlock เป็นส่วนหนึ่งของ unsafe)</div></div>
+</div></div>
 <h2>1.6 Banker's Algorithm ★</h2>
 <div class="box goal"><span class="t">🎯 ต้องทำได้</span>หา Total, Need และ safe sequence ได้ และตอบได้ว่าคำขอ (request) ให้ได้หรือไม่ พร้อมเหตุผล</div>
 <div class="slides wide">
@@ -463,8 +474,8 @@ safe sequence = &lt;P1, P3, P4, P5, P2&gt;</pre></div></div>
 <div class="nextprev"><a href="basics.html">← บทที่ 0 ปูพื้นฐาน</a><a class="r" href="memory.html">บทที่ 2 Memory →</a></div>
 </main>
 </div>
-<script src="assets/core.js"></script>
-<script src="assets/ui.js"></script>
-<script src="assets/widgets.js"></script>
+<script src="assets/core.js?v=20261027"></script>
+<script src="assets/ui.js?v=20261027"></script>
+<script src="assets/widgets.js?v=20261027"></script>
 </body>
 </html>

@@ -200,3 +200,5 @@ table.gloss td:first-child { white-space: nowrap; font-weight: 600; }
 .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0; }
 .flow span { background: var(--accent-soft); border: 1px solid #cdd8f7; border-radius: 8px; padding: 3px 10px; font-size: .92rem; }
 .flow i { color: var(--muted); font-style: normal; }
+
+.topbar .ver { margin-left: auto; padding-left: 12px; font-size: .78rem; color: var(--muted); white-space: nowrap; }
